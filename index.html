@@ -794,9 +794,9 @@ function stageExtra(n) {
   if (n === 1) return `
     <div class="card"><h2>Most similar existing measures</h2>
       <p class="hint">List the measures that come closest and state, for each, why it cannot be reused, adapted, or extended.</p>
-      ${P.similarMeasures.length ? `<div class="tablewrap"><table><thead><tr><th scope="col">Measure</th><th scope="col">Limitation</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody>
+      ${P.similarMeasures.length ? `<div class="tablewrap"><table><thead><tr><th scope="col">Measure</th><th scope="col" style="min-width:16rem">Limitation</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody>
       ${P.similarMeasures.map((m, i) => `<tr>
-        <td><input type="text" id="sm-n-${m.id}" aria-label="Measure ${i + 1}: name" data-bind="similarMeasures.${i}.name" value="${esc(m.name)}"></td>
+        <td><input type="text" id="sm-n-${m.id}" aria-label="Measure ${i + 1}: name" data-bind="similarMeasures.${i}.name" value="${esc(m.name)}" style="min-width:13rem"></td>
         <td><textarea id="sm-l-${m.id}" aria-label="Measure ${i + 1}: limitation" data-bind="similarMeasures.${i}.limitation" style="min-height:3.2rem">${esc(m.limitation)}</textarea></td>
         <td class="tight"><button class="btn small danger" data-act="delMeasure" data-i="${i}" aria-label="Remove measure ${i + 1}">Remove</button></td></tr>`).join("")}
       </tbody></table></div>` : `<p class="hint">No measures listed yet.</p>`}
