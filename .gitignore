@@ -1,0 +1,6 @@
+# The manuscript is not part of the public repository
+*.docx
+*.pdf
+.DS_Store
+.vercel
+.claude/

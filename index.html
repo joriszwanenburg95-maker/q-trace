@@ -1,0 +1,1575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Q-TRACE</title>
+<meta name="description" content="Q-TRACE: document the early development of a trait questionnaire, decision by decision and item by item.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232f5639'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#fbfaf6; --card:#ffffff; --ink:#232b36; --muted:#55606f; --line:#dfe3e8; --line-strong:#b9c0ca;
+  --forest:#2f5639; --forest-dark:#1f3526; --forest-soft:#e3ede4; --forest-tint:#f3f7f3;
+  --amber:#7a4d00; --amber-soft:#fbf1d9; --amber-line:#e7cf93;
+  --red:#9b1c1c; --red-soft:#fbeae8; --red-line:#eebdb7;
+  --grey-soft:#eef0f3;
+  --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.06);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;color:var(--forest-dark);margin:0}
+h1{font-size:1.9rem;letter-spacing:-.01em}
+h2{font-size:1.25rem;margin-top:2rem;margin-bottom:.6rem}
+h3{font-size:1.05rem}
+p{margin:.5rem 0}
+a{color:var(--forest);text-underline-offset:2px}
+a:hover{color:var(--forest-dark)}
+:focus-visible{outline:3px solid #1d6fd6;outline-offset:2px;border-radius:4px}
+.skip{position:absolute;left:-999px;top:0;background:var(--forest);color:#fff;padding:.6rem 1rem;z-index:100;border-radius:0 0 8px 0}
+.skip:focus{left:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* header */
+.top{position:sticky;top:0;z-index:20;background:rgba(251,250,246,.96);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:.7rem 1rem;display:flex;align-items:center;gap:1rem}
+.brand{display:flex;align-items:center;gap:.55rem;font-family:var(--serif);font-weight:700;font-size:1.15rem;color:var(--forest-dark);text-decoration:none}
+.brand svg{width:26px;height:26px;flex:none}
+.top .pname{color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.saved{color:var(--muted);font-size:.8rem;white-space:nowrap}
+
+/* layout */
+.shell{max-width:1180px;margin:0 auto;padding:1.25rem 1rem 4rem;display:grid;grid-template-columns:250px minmax(0,1fr);gap:2rem}
+.side{position:sticky;top:4.2rem;align-self:start;max-height:calc(100vh - 5rem);overflow:auto}
+.side ol,.side ul{list-style:none;margin:0;padding:0}
+.side .lbl{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:1rem .6rem .35rem;font-weight:600}
+.side a{position:relative;display:flex;align-items:center;gap:.55rem;padding:.42rem .6rem;border-radius:8px;color:var(--ink);text-decoration:none;font-size:.92rem;line-height:1.3}
+.side a:hover{background:var(--forest-tint)}
+.side a[aria-current="page"]{background:var(--forest-soft);color:var(--forest-dark);font-weight:600}
+.num{flex:none;width:1.5rem;height:1.5rem;border-radius:50%;border:1.5px solid var(--line-strong);display:inline-grid;place-items:center;font-size:.72rem;font-weight:700;color:var(--muted);background:#fff}
+.num.followed{background:var(--forest);border-color:var(--forest);color:#fff}
+.num.deviation{background:var(--amber-soft);border-color:#b8860b;color:var(--amber)}
+.num.na{background:var(--grey-soft);border-color:var(--line-strong);color:var(--muted)}
+main{min-width:0}
+main:focus{outline:none}
+
+/* cards & forms */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.1rem 1.2rem;margin:1rem 0}
+.card>h2:first-child,.card>h3:first-child{margin-top:0}
+.eyebrow{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--forest);font-weight:700;margin-bottom:.3rem}
+.lead{color:var(--muted);font-size:1.02rem;max-width:68ch}
+.hint{color:var(--muted);font-size:.85rem}
+label,.label{display:block;font-weight:600;font-size:.9rem;margin:.8rem 0 .25rem}
+input[type=text],input[type=date],input[type=number],select,textarea{width:100%;font:inherit;color:var(--ink);background:#fff;border:1px solid var(--line-strong);border-radius:8px;padding:.5rem .65rem}
+textarea{min-height:5.2rem;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #1d6fd6;outline-offset:1px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 1rem}
+.row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.btn{font:inherit;font-weight:600;font-size:.92rem;border-radius:9px;padding:.55rem .95rem;border:1px solid var(--line-strong);background:#fff;color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;line-height:1.2}
+.btn:hover{background:var(--forest-tint);color:var(--ink)}
+.btn.primary{background:var(--forest);border-color:var(--forest);color:#fff}
+.btn.primary:hover{background:var(--forest-dark);color:#fff}
+.btn.small{padding:.3rem .6rem;font-size:.82rem;border-radius:7px}
+.btn.danger{color:var(--red);border-color:var(--red-line)}
+.btn.danger:hover{background:var(--red-soft)}
+.btn.link{border:0;background:none;padding:0;color:var(--forest);text-decoration:underline;font-weight:500}
+.check{display:flex;gap:.6rem;align-items:flex-start;margin:.45rem 0;font-weight:400;font-size:.95rem}
+.check input{margin-top:.28rem;width:1.05rem;height:1.05rem;flex:none;accent-color:var(--forest)}
+fieldset{border:0;padding:0;margin:0}
+legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:.35rem}
+.choice{display:flex;flex-wrap:wrap;gap:.5rem}
+.choice label{margin:0;font-weight:500;border:1px solid var(--line-strong);border-radius:999px;padding:.38rem .85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem;background:#fff}
+.choice input{accent-color:var(--forest)}
+.choice label:has(input:checked){background:var(--forest-soft);border-color:var(--forest);color:var(--forest-dark);font-weight:600}
+.rule{background:var(--forest-tint);border:1px solid #cfe0d2;border-left:4px solid var(--forest);border-radius:10px;padding:.8rem 1rem;margin:.6rem 0}
+.rule .src{font-size:.85rem;color:var(--muted);margin-top:.3rem}
+.note{border-radius:10px;padding:.65rem .9rem;margin:.7rem 0;font-size:.92rem;border:1px solid var(--line);background:var(--grey-soft)}
+.note.warn{background:var(--amber-soft);border-color:var(--amber-line);color:#4d3200}
+.note.bad{background:var(--red-soft);border-color:var(--red-line);color:#5f1212}
+.note.ok{background:var(--forest-tint);border-color:#cfe0d2;color:var(--forest-dark)}
+.badge{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.03em;border-radius:999px;padding:.12rem .55rem;border:1px solid var(--line-strong);background:#fff;color:var(--muted);vertical-align:middle;max-width:100%}
+.badge.ok{background:var(--forest-soft);border-color:#b9d3bd;color:var(--forest-dark)}
+.badge.warn{background:var(--amber-soft);border-color:var(--amber-line);color:var(--amber)}
+.badge.bad{background:var(--red-soft);border-color:var(--red-line);color:var(--red)}
+.links{list-style:none;padding:0;margin:.3rem 0}
+.links li{margin:.3rem 0}
+.links .hint{display:block}
+.tablewrap{position:relative;overflow-x:auto;margin:.6rem 0;border:1px solid var(--line);border-radius:10px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:.5rem .65rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:#f7f8f9;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td input[type=text],td select,td input[type=number]{min-width:9rem}
+td.tight{white-space:nowrap}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86rem}
+.pager{display:flex;justify-content:space-between;gap:1rem;margin-top:2rem;flex-wrap:wrap}
+
+/* home */
+.home{max-width:760px;margin:0 auto;padding:3rem 1rem 4rem}
+.home h1{font-size:2.5rem;margin:.4rem 0 1rem}
+.home .lead{font-size:1.12rem}
+.home .actions{display:flex;flex-wrap:wrap;gap:.7rem;margin:1.6rem 0}
+.home .btn{padding:.75rem 1.15rem;font-size:1rem}
+.stagelist{columns:2;column-gap:2rem;list-style:none;padding:0;margin:.4rem 0 0;font-size:.93rem}
+.stagelist li{break-inside:avoid;margin:.38rem 0;display:flex;gap:.55rem;align-items:center}
+
+/* item history */
+.timeline{list-style:none;margin:.5rem 0 0;padding:0;border-left:2px solid var(--line);margin-left:.5rem}
+.timeline>li{position:relative;padding:0 0 1rem 1.2rem}
+.timeline>li::before{content:"";position:absolute;left:-7px;top:.45rem;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--forest)}
+.timeline>li.ev::before{border-color:#b8860b}
+.timeline>li.dec::before{background:var(--forest)}
+.timeline .when{font-size:.78rem;color:var(--muted)}
+.timeline .kind{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.itemtext{font-family:var(--serif);font-size:1.08rem}
+
+/* dialog & toast */
+dialog{border:1px solid var(--line);border-radius:14px;padding:0;max-width:640px;width:calc(100% - 2rem);box-shadow:0 20px 60px rgba(16,24,40,.25);color:var(--ink)}
+dialog::backdrop{background:rgba(20,30,25,.45)}
+dialog form{padding:1.2rem 1.3rem;max-height:86vh;overflow:auto}
+dialog h2{margin-top:0}
+.dlg-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.picklist{border:1px solid var(--line-strong);border-radius:8px;max-height:12rem;overflow:auto;padding:.3rem .6rem;background:#fff}
+#toast{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);background:var(--forest-dark);color:#fff;padding:.6rem 1rem;border-radius:10px;font-size:.92rem;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 2rem);z-index:60}
+#toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:.5rem;padding-top:.5rem}
+  .side{position:static;max-height:none;min-width:0;overflow-x:auto;margin:0 -1rem;padding:.2rem 1rem .5rem;border-bottom:1px solid var(--line)}
+  .side nav{display:flex;gap:.3rem;align-items:center;width:max-content}
+  .side ol,.side ul{display:flex;gap:.3rem}
+  .side .lbl{display:none}
+  .side a{white-space:nowrap;border:1px solid var(--line);background:#fff;padding:.35rem .65rem}
+  .side a .long{display:none}
+  .grid2{grid-template-columns:1fr}
+  h1{font-size:1.55rem}
+  .home h1{font-size:1.9rem}
+  .stagelist{columns:1}
+  .top .saved{display:none}
+}
+@media (min-width:901px){.side a .short{display:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div id="app"></div>
+<dialog id="dlg" aria-labelledby="dlg-title"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   Q-TRACE — single-file web tool. No server, no network calls:
+   all project data stay in this browser (localStorage).
+   ============================================================ */
+
+const STORE_KEY = "qtrace.project.v1";
+const FORMAT = "q-trace";
+const FORMAT_VERSION = 1;
+
+/* ---------- references (DOIs as given in the paper) ---------- */
+const REF = {
+  boateng: ["Boateng et al., 2018", "https://doi.org/10.3389/fpubh.2018.00149"],
+  stefana: ["Stefana et al., 2025", "https://doi.org/10.3389/fpsyg.2024.1494261"],
+  elson: ["Elson et al., 2023", "https://doi.org/10.1038/s44271-023-00026-9"],
+  clark: ["Clark & Watson, 2019", "https://doi.org/10.1037/pas0000626"],
+  cronbach: ["Cronbach & Meehl, 1955", "https://doi.org/10.1037/h0040957"],
+  mackenzie: ["MacKenzie et al., 2011", "https://doi.org/10.2307/23044045"],
+  patrick: ["Patrick et al., 2011", "https://doi.org/10.1016/j.jval.2011.06.014"],
+  patrickb: ["Patrick et al., 2011b", "https://doi.org/10.1016/j.jval.2011.06.013"],
+  mokkink: ["Mokkink et al., 2025", "https://doi.org/10.1016/j.jclinepi.2025.111879"],
+  weijters: ["Weijters et al., 2010", "https://doi.org/10.1016/j.ijresmar.2010.02.004"],
+  simms: ["Simms et al., 2019", "https://doi.org/10.1037/pas0000648"],
+  lynn: ["Lynn, 1986", "https://doi.org/10.1097/00006199-198611000-00017"],
+  polit: ["Polit et al., 2007", "https://doi.org/10.1002/nur.20199"],
+  terwee: ["Terwee et al., 2018", "https://doi.org/10.1007/s11136-018-1829-0"],
+  hommel: ["Hommel & Arslan, 2025", "https://doi.org/10.1177/25152459251377093"],
+  wulff: ["Wulff & Mata, 2025", "https://doi.org/10.1038/s41562-024-02089-y"],
+  pillet: ["Pillet et al., 2026", "https://doi.org/10.25300/MISQ/2025/18946"],
+  mezetin: ["Mezetin & Massey, 2014", "https://doi.org/10.1002/9781118838860.ch8"]
+};
+
+const TOOL = {
+  psycinfo: { label: "APA PsycInfo", url: "https://www.apa.org/pubs/databases/psycinfo", note: "Literature database for finding existing measures." },
+  psyctests: { label: "APA PsycTests", url: "https://www.apa.org/pubs/databases/psyctests", note: "Database of psychological tests and measures." },
+  surveybot: { label: "SurveyBot3000 (Hommel & Arslan, 2025)", url: "https://huggingface.co/spaces/magnolia-psychometrics/synthetic-correlations", note: "Public app that predicts the overlap between items and scales from their wording alone." },
+  surveybotPaper: { label: "Hommel & Arslan (2025), paper", url: REF.hommel[1], note: "Background and accuracy of the predictions." },
+  wulff: { label: "Wulff & Mata (2025), semantic embeddings of measures", url: REF.wulff[1], note: "Compares measures on their meaning rather than their label." },
+  rater: { label: "RATER (Pillet et al., 2026)", url: "https://contval.org/", note: "Specialist web tool for content validity assessment, with a more detailed assessment than relevance alone." },
+  qnotes: { label: "Q-Notes (Mezetin & Massey, 2014)", url: "https://wwwn.cdc.gov/qnotes/", note: "Analysis software for cognitive interviewing studies." }
+};
+
+/* ---------- the eight stages ---------- */
+const STAGES = [
+  { n: 1, title: "Justifying the need for a new measure", short: "Need",
+    intro: "Many newly introduced measures are rarely reused, and a measure with a new label may introduce a construct that already exists under another name. Search the literature and test databases, complement this with a semantic search, and write a short justification of why a new measure is needed.",
+    checklist: [
+      "Can an existing measure be reused, adapted, or extended?",
+      "Do similar measures fall short conceptually (e.g., different construct boundaries)?",
+      "Do similar measures fall short content-wise (e.g., insufficient coverage of the intended construct)?",
+      "Do similar measures fall short contextually (e.g., a different population or setting)?"
+    ],
+    rule: "A new measure is developed only when the justification explains, for each of the most similar existing measures, why it cannot be reused, adapted, or extended.",
+    sources: ["stefana", "elson"],
+    tools: ["psycinfo", "psyctests", "surveybot", "surveybotPaper", "wulff"] },
+  { n: 2, title: "Construct specification", short: "Construct",
+    intro: "Poorly bounded constructs invite items that capture antecedents, consequences, or neighboring constructs instead of the construct itself. Record a short definition before any items are written: it is the reference point for later decisions, and each version is saved so that later changes to the construct remain visible.",
+    checklist: [
+      "The facets of the construct are defined.",
+      "What the construct does and does not include is stated.",
+      "Expected relations with other constructs, and their direction, are stated.",
+      "Generality and time frame are specified."
+    ],
+    rule: "Items are written only after the construct, its facets, and its boundaries have been defined.",
+    sources: ["cronbach", "mackenzie", "clark"],
+    tools: [] },
+  { n: 3, title: "Target population exploration", short: "Population", recommended: true,
+    intro: "Items only represent the construct for a population if they reflect how its members experience and describe it. Map each theme from interviews or focus groups onto the facets defined in Stage 2; themes that fit no facet require an explicit decision: broaden the construct or exclude the theme.",
+    checklist: [
+      "Method and sample are described.",
+      "The main themes are listed.",
+      "The fit of each theme with the facets is assessed."
+    ],
+    rule: "The stage is complete when every theme is assigned to a facet or explicitly excluded; skipping the stage is justified by explaining why the experiences and language of the target population are already known.",
+    sources: ["patrick", "mokkink"],
+    tools: [] },
+  { n: 4, title: "Initial item pool", short: "Item pool",
+    intro: "The initial item pool should be deliberately broad: psychometric analysis can remove weak items, but it cannot recover content that was never written. Note the source of each item and record, for the items with the highest predicted overlap, whether the overlap was expected and what was decided.",
+    checklist: [
+      "The source of each item is recorded (existing scale, new, or LLM with model and prompt).",
+      "Coverage per facet is checked.",
+      "Items with high predicted overlap are identified, and it is recorded whether the overlap was expected."
+    ],
+    rule: "Every facet is represented by at least twice as many items as intended for the final version.",
+    sources: ["boateng"],
+    ruleNote: "Boateng et al. recommend this for the full item pool; Q-TRACE applies it per facet.",
+    tools: ["surveybot", "wulff"] },
+  { n: 5, title: "Wording and response format", short: "Wording",
+    intro: "Wording and response format are a main source of construct-irrelevant variance, and for trait measures state wording makes scores partly dependent on the moment of measurement. There is rarely one correct choice here; most decisions are trade-offs, so the format and instructions are recorded with a short justification.",
+    checklist: [
+      "Items are checked for double-barreled wording.",
+      "Items are checked for negation.",
+      "Items are checked for jargon.",
+      "The reading level fits the target population.",
+      "Items are checked for state wording (a general tendency, not a single moment).",
+      "The rationale for the response format and instructions is recorded (e.g., fewer than six options reduces precision)."
+    ],
+    rule: "The response format, labels, and instructions are recorded with a short justification.",
+    sources: ["weijters", "simms"],
+    tools: [] },
+  { n: 6, title: "Expert content evaluation", short: "Experts",
+    intro: "Expert ratings are the main evidence for content validity before any data are collected. Include both domain experts and people who know the target population, and upload each expert's relevance rating per item: the tool calculates the I-CVI and the S-CVI/Ave, so that it is clear how the values were obtained and each rating stays linked to the item.",
+    checklist: [
+      "Domain experts are included.",
+      "People who know the target population are included.",
+      "Missing content is asked for and recorded per facet."
+    ],
+    rule: "Items with an I-CVI below .78 (based on six or more experts) are reconsidered: revised, removed, or retained with a justification. For the scale as a whole, an S-CVI/Ave of at least .90 is recommended.",
+    sources: ["lynn", "polit"],
+    tools: ["rater"] },
+  { n: 7, title: "Cognitive interviewing", short: "Interviews",
+    intro: "Expert ratings show whether items are relevant, but not whether respondents interpret them as intended: a misread item still yields a plausible answer. Code problems per item, preferably with more than one coder, and link each revision to the finding that prompted it.",
+    checklist: [
+      "Did the same problem occur in more than one interview?",
+      "Critical misinterpretations are identified.",
+      "It is checked whether respondents answer about their general tendency rather than a recent episode.",
+      "The finding behind each revision is recorded.",
+      "Substantially revised items are tested in a further round."
+    ],
+    rule: "Draft items are tested in cognitive interviews with members of the target population.",
+    sources: ["patrickb", "terwee"],
+    tools: ["qnotes"] },
+  { n: 8, title: "Item revision and decision logging", short: "Decisions",
+    intro: "The final stage integrates the evidence from all previous stages into a decision for each item: retained, removed, revised, merged, or added. Q-TRACE does not resolve conflicting evidence; state briefly for each decision which evidence was given most weight and why. The stage ends with a numbered version that is ready for pilot testing.",
+    checklist: [
+      "Every item has a final status.",
+      "The evidence given most weight is stated for each decision.",
+      "Deviations from the default rules are listed together."
+    ],
+    rule: "The final version is shared together with its development record (e.g., in an open repository).",
+    sources: ["elson"],
+    tools: [] }
+];
+
+const STATUS = { followed: "Rule followed", deviation: "Deviation", na: "Not applicable" };
+const SOURCE_TYPES = { existing: "Existing scale", new: "New", llm: "LLM", other: "Other" };
+const EVIDENCE_TYPES = { expert: "Expert ratings", interview: "Interview finding", overlap: "Overlap signal" };
+const EVIDENCE_STAGE = { expert: 6, interview: 7, overlap: 4 };
+const DECISION_TYPES = { retained: "Retained", revised: "Revised", merged: "Merged", removed: "Removed", added: "Added", return: "Return to an earlier stage" };
+
+/* ---------- small helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nl2br = s => esc(s).replace(/\n/g, "<br>");
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : "id-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+const fmtCvi = x => (x == null || isNaN(x)) ? "–" : (x >= 0.995 ? "1.00" : x.toFixed(2).replace(/^0/, ""));
+const slug = s => (String(s || "project").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "project").slice(0, 50);
+const cite = keys => keys.map(k => `<a href="${REF[k][1]}" target="_blank" rel="noopener noreferrer">${esc(REF[k][0])}</a>`).join("; ");
+const citePlain = keys => keys.map(k => REF[k][0]).join("; ");
+const cut = (s, n = 70) => { s = String(s || ""); return s.length > n ? s.slice(0, n - 1) + "…" : s; };
+
+/* ---------- project model ---------- */
+let P = null;
+let saveTimer = null;
+
+function newProject() {
+  const stages = {};
+  STAGES.forEach(s => { stages[s.n] = { checklist: s.checklist.map(() => false), status: "", justification: "" }; });
+  return {
+    id: uid(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    meta: { name: "", construct: "", population: "", researchers: "", date: today() },
+    facets: [],
+    stages,
+    similarMeasures: [],
+    definitionDraft: { definition: "", excludes: "", relations: "", timeframe: "" },
+    definitions: [],
+    population: { method: "", themes: [] },
+    format: { response: "", labels: "", instructions: "" },
+    cviUploads: [],
+    items: [],
+    evidence: [],
+    decisions: [],
+    releases: []
+  };
+}
+
+function normalize(p) {
+  const base = newProject();
+  const out = Object.assign(base, p);
+  out.meta = Object.assign(newProject().meta, p.meta || {});
+  out.definitionDraft = Object.assign({ definition: "", excludes: "", relations: "", timeframe: "" }, p.definitionDraft || {});
+  out.population = Object.assign({ method: "", themes: [] }, p.population || {});
+  out.format = Object.assign({ response: "", labels: "", instructions: "" }, p.format || {});
+  const st = {};
+  STAGES.forEach(s => {
+    const cur = (p.stages && p.stages[s.n]) || {};
+    st[s.n] = { checklist: s.checklist.map((_, i) => !!(cur.checklist && cur.checklist[i])), status: cur.status || "", justification: cur.justification || "" };
+  });
+  out.stages = st;
+  ["facets", "similarMeasures", "definitions", "cviUploads", "items", "evidence", "decisions", "releases"].forEach(k => { if (!Array.isArray(out[k])) out[k] = []; });
+  if (!Array.isArray(out.population.themes)) out.population.themes = [];
+  return out;
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) P = normalize(JSON.parse(raw));
+  } catch (e) { P = null; }
+}
+function saveNow() {
+  if (!P) return;
+  P.updatedAt = new Date().toISOString();
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(P));
+    const el = $("#saved"); if (el) el.textContent = "Saved in this browser";
+  } catch (e) {
+    const el = $("#saved"); if (el) el.textContent = "Could not save";
+    toast("Could not save in this browser. Export the data file to keep your work.");
+  }
+}
+function save() { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 250); }
+
+function setPath(obj, path, val) {
+  const parts = path.split(".");
+  let o = obj;
+  for (let i = 0; i < parts.length - 1; i++) { if (o[parts[i]] == null) return; o = o[parts[i]]; }
+  o[parts[parts.length - 1]] = val;
+}
+function getPath(obj, path) { return path.split(".").reduce((o, k) => (o == null ? o : o[k]), obj); }
+
+/* ---------- derived data ---------- */
+const facetName = id => { const f = P.facets.find(f => f.id === id); return f ? f.name || "(unnamed facet)" : "No facet"; };
+const getItem = id => P.items.find(i => i.id === id);
+const curVersion = it => it.versions[it.versions.length - 1];
+const itemDecisions = id => P.decisions.filter(d => d.targets.some(t => t.itemId === id));
+const statusDecisions = id => itemDecisions(id).filter(d => d.type !== "return");
+function itemStatus(id) { const ds = statusDecisions(id); return ds.length ? ds[ds.length - 1] : null; }
+function sourceText(src) {
+  if (!src) return "Not recorded";
+  if (src.type === "existing") return "Existing scale" + (src.scale ? ": " + src.scale : "");
+  if (src.type === "new") return "New" + (src.detail ? ": " + src.detail : "");
+  if (src.type === "llm") return "LLM" + (src.model ? " — model: " + src.model : "") + (src.prompt ? " — prompt: " + src.prompt : "");
+  if (src.type === "other") return "Other" + (src.detail ? ": " + src.detail : "");
+  return "Not recorded";
+}
+function deviations(upTo = 7) {
+  return STAGES.filter(s => s.n <= upTo).map(s => ({ s, st: P.stages[s.n] })).filter(x => x.st.status === "deviation" || x.st.status === "na");
+}
+function facetCoverage() {
+  const rows = P.facets.map(f => {
+    const n = P.items.filter(i => i.facetId === f.id).length;
+    const intended = Number(f.intended) || 0;
+    return { f, n, intended, required: intended * 2, ok: intended > 0 ? n >= intended * 2 : null };
+  });
+  const none = P.items.filter(i => !P.facets.some(f => f.id === i.facetId)).length;
+  return { rows, none };
+}
+
+/* ---------- CSV + content validity ---------- */
+const CSV_COLUMNS = ["expert_id", "expert_type", "item_id", "item_version", "relevance", "comment"];
+
+function parseCSV(text) {
+  text = text.replace(/^﻿/, "");
+  const firstLine = text.split(/\r?\n/)[0] || "";
+  const count = ch => firstLine.split(ch).length - 1;
+  const delim = count(";") > count(",") ? ";" : (count("\t") > count(",") ? "\t" : ",");
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === delim) { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(cell); rows.push(row); row = []; cell = "";
+    } else cell += c;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(c => String(c).trim() !== ""));
+}
+
+function readRatings(text) {
+  const rows = parseCSV(text);
+  const problems = [];
+  if (!rows.length) return { error: "The file is empty." };
+  const head = rows[0].map(h => String(h).trim().toLowerCase());
+  const missing = CSV_COLUMNS.filter(c => c !== "comment" && !head.includes(c));
+  if (missing.length) return { error: "Missing column(s): " + missing.join(", ") + ". Expected columns: " + CSV_COLUMNS.join(", ") + "." };
+  const ix = Object.fromEntries(CSV_COLUMNS.map(c => [c, head.indexOf(c)]));
+  const ratings = [];
+  rows.slice(1).forEach((r, n) => {
+    const line = n + 2;
+    const get = c => (ix[c] >= 0 ? String(r[ix[c]] ?? "").trim() : "");
+    const rel = Number(get("relevance"));
+    const ver = parseInt(get("item_version").replace(/^v/i, ""), 10);
+    const type = get("expert_type").toLowerCase();
+    if (!get("expert_id") || !get("item_id")) { problems.push(`Row ${line}: expert_id or item_id is empty; row skipped.`); return; }
+    if (![1, 2, 3, 4].includes(rel)) { problems.push(`Row ${line}: relevance must be 1, 2, 3 or 4; row skipped.`); return; }
+    if (!Number.isInteger(ver) || ver < 1) { problems.push(`Row ${line}: item_version must be a whole number (1, 2, …); row skipped.`); return; }
+    if (type !== "domain" && type !== "population") problems.push(`Row ${line}: expert_type "${get("expert_type")}" is not "domain" or "population".`);
+    ratings.push({ expert_id: get("expert_id"), expert_type: type, item_id: get("item_id"), item_version: ver, relevance: rel, comment: get("comment") });
+  });
+  if (!ratings.length) return { error: "No valid rating rows were found.", problems };
+  return { ratings, problems };
+}
+
+/* I-CVI = experts rating 3 or 4 / experts who rated the item; S-CVI/Ave = mean of the I-CVIs. */
+function computeCVI(ratings) {
+  const groups = new Map();
+  const experts = new Map();
+  const dup = [];
+  ratings.forEach(r => {
+    experts.set(r.expert_id.toLowerCase(), r.expert_type);
+    const key = r.item_id.toLowerCase() + "|" + r.item_version;
+    if (!groups.has(key)) groups.set(key, { item_id: r.item_id, item_version: r.item_version, byExpert: new Map() });
+    const g = groups.get(key);
+    if (g.byExpert.has(r.expert_id.toLowerCase())) dup.push(`${r.expert_id} rated ${r.item_id} v${r.item_version} more than once; the last rating was used.`);
+    g.byExpert.set(r.expert_id.toLowerCase(), r);
+  });
+  const results = Array.from(groups.values()).map(g => {
+    const rs = Array.from(g.byExpert.values());
+    const relevant = rs.filter(r => r.relevance >= 3).length;
+    return {
+      item_id: g.item_id, item_version: g.item_version, n: rs.length, relevant, icvi: relevant / rs.length,
+      nDomain: rs.filter(r => r.expert_type === "domain").length, nPopulation: rs.filter(r => r.expert_type === "population").length,
+      comments: rs.filter(r => r.comment).map(r => ({ expert_id: r.expert_id, expert_type: r.expert_type, relevance: r.relevance, comment: r.comment }))
+    };
+  });
+  const types = Array.from(experts.values());
+  return {
+    results,
+    sCviAve: results.reduce((a, r) => a + r.icvi, 0) / results.length,
+    nExperts: experts.size, nDomain: types.filter(t => t === "domain").length, nPopulation: types.filter(t => t === "population").length,
+    duplicates: dup
+  };
+}
+
+function addCviUpload(filename, text, date) {
+  const parsed = readRatings(text);
+  if (parsed.error) return parsed;
+  const cvi = computeCVI(parsed.ratings);
+  const same = P.cviUploads.find(u => u.content === text);
+  if (same) removeCviUpload(same.id);
+  const upload = { id: uid(), filename, date: date || today(), content: text, ratings: parsed.ratings, problems: parsed.problems.concat(cvi.duplicates),
+    nExperts: cvi.nExperts, nDomain: cvi.nDomain, nPopulation: cvi.nPopulation, sCviAve: cvi.sCviAve, results: [] };
+  cvi.results.forEach(r => {
+    const it = P.items.find(i => i.id.toLowerCase() === r.item_id.toLowerCase());
+    const hasVersion = it && it.versions.some(v => v.v === r.item_version);
+    const res = { itemId: it ? it.id : r.item_id, version: r.item_version, n: r.n, relevant: r.relevant, icvi: r.icvi, nDomain: r.nDomain, nPopulation: r.nPopulation, linked: !!hasVersion,
+      reason: !it ? "item ID not found in the item table" : (!hasVersion ? "this item has no version " + r.item_version : "") };
+    upload.results.push(res);
+    if (hasVersion) {
+      P.evidence.push({ id: uid(), itemId: it.id, version: r.item_version, type: "expert", stage: 6, date: upload.date, uploadId: upload.id,
+        summary: `I-CVI = ${fmtCvi(r.icvi)} (${r.relevant} of ${r.n} experts rated the item 3 or 4)` + (r.n < 6 ? "; fewer than six experts" : ""),
+        data: { n: r.n, relevant: r.relevant, icvi: r.icvi, nDomain: r.nDomain, nPopulation: r.nPopulation, comments: r.comments } });
+    }
+  });
+  P.cviUploads.push(upload);
+  return { upload, replaced: !!same };
+}
+function removeCviUpload(id) {
+  P.cviUploads = P.cviUploads.filter(u => u.id !== id);
+  const gone = P.evidence.filter(e => e.uploadId === id).map(e => e.id);
+  P.evidence = P.evidence.filter(e => e.uploadId !== id);
+  P.decisions.forEach(d => { if (d.evidenceIds) d.evidenceIds = d.evidenceIds.filter(x => !gone.includes(x)); });
+}
+
+/* ---------- example project (entirely fictional) ---------- */
+const EXAMPLE_CSV = `expert_id,expert_type,item_id,item_version,relevance,comment
+E1,domain,ANT-01,1,4,
+E2,domain,ANT-01,1,4,
+E3,domain,ANT-01,1,3,
+E4,population,ANT-01,1,4,
+E5,population,ANT-01,1,3,
+E6,population,ANT-01,1,4,
+E1,domain,ANT-02,1,3,
+E2,domain,ANT-02,1,2,"Two ideas in one item: preparing and keeping a list."
+E3,domain,ANT-02,1,4,
+E4,population,ANT-02,1,2,"Not everyone keeps a list; hard to answer."
+E5,population,ANT-02,1,3,
+E6,population,ANT-02,1,3,
+E1,domain,ANT-03,1,4,
+E2,domain,ANT-03,1,3,
+E3,domain,ANT-03,1,4,
+E4,population,ANT-03,1,4,
+E5,population,ANT-03,1,3,
+E6,population,ANT-03,1,3,
+E1,domain,STR-01,1,4,
+E2,domain,STR-01,1,4,
+E3,domain,STR-01,1,4,
+E4,population,STR-01,1,3,
+E5,population,STR-01,1,4,
+E6,population,STR-01,1,4,
+E1,domain,STR-02,1,3,
+E2,domain,STR-02,1,4,
+E3,domain,STR-02,1,2,"This is about tidiness rather than planning."
+E4,population,STR-02,1,3,
+E5,population,STR-02,1,3,
+E6,population,STR-02,1,4,
+E1,domain,STR-03,1,4,
+E2,domain,STR-03,1,4,
+E3,domain,STR-03,1,3,
+E4,population,STR-03,1,4,
+E5,population,STR-03,1,4,
+E6,population,STR-03,1,3,
+`;
+
+function exampleProject() {
+  const p = newProject();
+  const keep = P; P = p; // builders below work on P
+  const fA = uid(), fB = uid();
+  p.meta = { name: "Planning Ahead Scale (fictional example)", construct: "Planning ahead: the general tendency to think ahead about upcoming tasks and to organise them in advance",
+    population: "Working adults aged 18 to 65", researchers: "Researcher A; Researcher B", date: "2026-03-02" };
+  p.facets = [{ id: fA, name: "Anticipating", intended: 2 }, { id: fB, name: "Structuring", intended: 2 }];
+  p.similarMeasures = [
+    { id: uid(), name: "General Planning Inventory (fictional)", limitation: "Mixes planning with punctuality and goal setting, so a planning score cannot be interpreted on its own (conceptual)." },
+    { id: uid(), name: "Daily Organisation Checklist (fictional)", limitation: "Developed for secondary-school pupils; the items refer to homework and timetables and do not fit working adults (contextual)." },
+    { id: uid(), name: "Orderliness subscale of a broad personality inventory (fictional)", limitation: "Covers tidiness of the environment but not thinking ahead about tasks (content)." }
+  ];
+  p.definitions = [
+    { version: 1, date: "2026-03-09", reason: "First recorded definition.",
+      definition: "Planning ahead is the tendency to think about future tasks and to be well organised.",
+      excludes: "Punctuality and goal setting.",
+      relations: "Positive relation with conscientiousness.",
+      timeframe: "General tendency.", facets: ["Anticipating", "Structuring"] },
+    { version: 2, date: "2026-03-23", reason: "\"Being well organised\" also covered tidiness, which is a neighboring construct. The boundary with orderliness is now explicit.",
+      definition: "Planning ahead is the general tendency to think ahead about upcoming tasks (anticipating) and to arrange their order and steps in advance (structuring).",
+      excludes: "Punctuality, goal setting, and orderliness of the physical environment (tidiness). The construct concerns tasks, not objects.",
+      relations: "Moderate positive relation with conscientiousness; small negative relation with procrastination; no relation expected with general intelligence.",
+      timeframe: "A general tendency across work and private life; no specific time window.", facets: ["Anticipating", "Structuring"] }
+  ];
+  p.definitionDraft = { definition: p.definitions[1].definition, excludes: p.definitions[1].excludes, relations: p.definitions[1].relations, timeframe: p.definitions[1].timeframe };
+  p.population = { method: "Two online focus groups with working adults (n = 5 and n = 6), 60 minutes each, on how they prepare for busy weeks.",
+    themes: [
+      { id: uid(), theme: "Thinking through the next day the evening before", facetId: fA, reason: "" },
+      { id: uid(), theme: "Deciding the order of tasks", facetId: fB, reason: "" },
+      { id: uid(), theme: "Breaking a big job into steps", facetId: fB, reason: "" },
+      { id: uid(), theme: "Keeping the desk tidy", facetId: "excluded", reason: "Concerns orderliness of the environment, which the definition (version 2) places outside the construct." }
+    ] };
+  p.format = { response: "Five-point agreement scale", labels: "1 = strongly disagree, 2 = disagree, 3 = neither agree nor disagree, 4 = agree, 5 = strongly agree (all options labelled)",
+    instructions: "The statements below are about how you deal with tasks in general, not only in the past week. Indicate how much you agree with each statement." };
+
+  const mk = (id, facetId, text, source, date, defV) => p.items.push({ id, facetId, source, versions: [{ v: 1, text, date, defVersion: defV }] });
+  mk("ANT-01", fA, "I think about what I need to do tomorrow before the day ends.", { type: "new", detail: "written by the research team" }, "2026-04-06", 2);
+  mk("ANT-02", fA, "I prepare for tasks and deadlines well in advance and keep a list.", { type: "existing", scale: "General Planning Inventory (fictional), item 7, adapted" }, "2026-04-06", 2);
+  mk("ANT-03", fA, "Before I start something new, I consider what could get in the way.", { type: "llm", model: "example-language-model-1 (fictional)", prompt: "Write five first-person statements about thinking ahead about upcoming tasks, at reading level B1, without negations." }, "2026-04-06", 2);
+  mk("STR-01", fB, "I divide large tasks into smaller steps.", { type: "new", detail: "written by the research team" }, "2026-04-06", 2);
+  mk("STR-02", fB, "I keep my work materials in a fixed place.", { type: "new", detail: "written by the research team" }, "2026-04-06", 2);
+  mk("STR-03", fB, "I decide in which order I will do my tasks.", { type: "other", detail: "theme from the Stage 3 focus groups (\"deciding the order of tasks\")" }, "2026-04-06", 2);
+
+  const ev = (itemId, version, type, stage, date, summary, extra) => { const e = Object.assign({ id: uid(), itemId, version, type, stage, date, summary }, extra || {}); p.evidence.push(e); return e.id; };
+  const dec = (type, stage, date, targets, reason, extra) => { p.decisions.push(Object.assign({ id: uid(), type, stage, date, targets, reason, weight: "", evidenceIds: [] }, extra || {})); };
+
+  dec("added", 3, "2026-04-06", [{ itemId: "STR-03", version: 1 }], "Deciding the order of tasks came up in both focus groups and was not yet covered by an item.");
+  const ovl = ev("STR-02", 1, "overlap", 4, "2026-04-13", "High predicted overlap with items on orderliness from a broad personality inventory (fictional).", { expected: "no" });
+
+  addCviUpload("example-expert-ratings.csv", EXAMPLE_CSV, "2026-05-11");
+  const cviOf = id => (p.evidence.find(e => e.itemId === id && e.type === "expert") || {}).id;
+
+  // ANT-02 is revised after the expert ratings: version 2
+  getItem("ANT-02").versions.push({ v: 2, text: "I start preparing for a deadline well before it arrives.", date: "2026-05-18", defVersion: 2 });
+  dec("revised", 6, "2026-05-18", [{ itemId: "ANT-02", version: 1 }], "I-CVI of .67 is below .78. Two experts noted that the item combines preparing and keeping a list (double-barreled). The list was dropped.",
+    { resultVersion: 2, evidenceIds: [cviOf("ANT-02")], weight: "Expert ratings and comments." });
+
+  const iv1 = ev("ANT-01", 1, "interview", 7, "2026-06-08", "In 3 of 8 interviews the respondent answered about the past week rather than about a general tendency (coded: reference period, moderate).");
+  const iv2 = ev("ANT-03", 1, "interview", 7, "2026-06-08", "In 2 of 8 interviews the respondent answered about one recent project rather than about a general tendency (coded: reference period, minor).");
+  ev("STR-01", 1, "interview", 7, "2026-06-08", "Understood as intended in all 8 interviews; no problems coded.");
+  ev("ANT-02", 2, "interview", 7, "2026-06-08", "Version 2 understood as intended in all 8 interviews; no problems coded.");
+  dec("return", 7, "2026-06-15", [], "The same reference-period problem occurred for several items, so the instruction was revisited rather than each item.", { returnTo: 5, evidenceIds: [iv1, iv2] });
+  dec("retained", 7, "2026-06-15", [{ itemId: "ANT-01", version: 1 }, { itemId: "ANT-02", version: 2 }, { itemId: "ANT-03", version: 1 }],
+    "Time frame clarified in the instruction (\"in general, not only in the past week\") for all Anticipating items; the item wording is unchanged.", { evidenceIds: [iv1, iv2], weight: "Interview findings: the problem lay in the reference period, not in the item content." });
+
+  dec("retained", 8, "2026-06-29", [{ itemId: "STR-01", version: 1 }, { itemId: "STR-03", version: 1 }], "Rated as relevant by all experts and understood as intended in the interviews.", { weight: "Expert ratings and interview findings agree." });
+  dec("removed", 8, "2026-06-29", [{ itemId: "STR-02", version: 1 }], "The item concerns tidiness, which the definition places outside the construct. The overlap with orderliness was not expected, and one expert made the same point.",
+    { evidenceIds: [ovl, cviOf("STR-02")], weight: "The overlap signal was given most weight: the I-CVI (.83) was acceptable, but relevance to the construct boundary matters more than the rating." });
+
+  const J = {
+    1: ["followed", "A literature search in two databases and a semantic search returned three similar measures. For each of them the limitation is recorded below: none measures thinking ahead about tasks separately from punctuality, goal setting or tidiness in working adults."],
+    2: ["followed", "The definition, two facets and the boundaries were recorded before any item was written. Version 2 sharpened the boundary with orderliness; all items were written under version 2."],
+    3: ["followed", "Two focus groups were held. All four themes are assigned to a facet or excluded with a reason."],
+    4: ["deviation", "Each facet has three items for an intended two, which is fewer than twice the intended number. The pool was kept small on purpose because this project serves as a demonstration; in a real study at least four items per facet would be written."],
+    5: ["followed", "A five-point scale with all options labelled keeps the task easy for a broad adult population; a sixth option would add precision but not criterion validity. The instruction asks about tasks in general to avoid state wording."],
+    6: ["followed", "Six experts rated all items (three domain experts, three people who know the population). One item fell below .78 and was revised; the S-CVI/Ave is .92."],
+    7: ["followed", "Eight cognitive interviews with working adults, coded per item by two coders. Only coded summaries are stored. The revised instruction will be checked in a further round."],
+    8: ["followed", "Every item has a final status with a reason. The record will be archived in an open repository together with the final version."]
+  };
+  STAGES.forEach(s => { p.stages[s.n].status = J[s.n][0]; p.stages[s.n].justification = J[s.n][1]; p.stages[s.n].checklist = s.checklist.map(() => true); });
+  p.stages[7].checklist[4] = false; // further round still planned
+  P = keep;
+  return p;
+}
+
+/* ---------- routing & rendering ---------- */
+let route = { view: "home" };
+function parseHash() {
+  const h = location.hash.replace(/^#\/?/, "");
+  const parts = h.split("/").map(decodeURIComponent);
+  if (!P || !parts[0]) return { view: "home" };
+  if (parts[0] === "project") return { view: "project" };
+  if (parts[0] === "stage" && STAGES.some(s => s.n === Number(parts[1]))) return { view: "stage", n: Number(parts[1]) };
+  if (parts[0] === "items" && parts[1]) return getItem(parts[1]) ? { view: "item", id: parts[1] } : { view: "items" };
+  if (parts[0] === "items") return { view: "items" };
+  if (parts[0] === "export") return { view: "export" };
+  return { view: "home" };
+}
+function go(hash) { if (location.hash === hash) { route = parseHash(); render(true); } else location.hash = hash; }
+
+function render(moveFocus) {
+  const active = document.activeElement && document.activeElement.id;
+  const app = $("#app");
+  if (route.view === "home" || !P) { app.innerHTML = viewHome(); document.title = "Q-TRACE"; }
+  else {
+    const body = route.view === "project" ? viewProject() : route.view === "stage" ? viewStage(route.n) : route.view === "items" ? viewItems() : route.view === "item" ? viewItem(route.id) : viewExport();
+    app.innerHTML = shell(body);
+    const h = $("main h1"); document.title = (route.view === "item" ? route.id + " · " : h ? h.textContent.trim() + " · " : "") + "Q-TRACE";
+    const cur = $(".side a[aria-current]"); if (cur && window.matchMedia("(max-width:900px)").matches) cur.scrollIntoView({ block: "nearest", inline: "center" });
+  }
+  if (moveFocus) { window.scrollTo(0, 0); const m = $("#main"); if (m) m.focus({ preventScroll: true }); }
+  else if (active) { const el = document.getElementById(active); if (el) el.focus({ preventScroll: true }); }
+}
+
+const LOGO = `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2f5639"/><path d="M9 16.5l4.5 4.5L23 11" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function shell(body) {
+  const is = (v, n) => route.view === v && (n == null || route.n === n) ? ' aria-current="page"' : "";
+  const itemsCur = (route.view === "items" || route.view === "item") ? ' aria-current="page"' : "";
+  return `
+  <header class="top"><div class="top-in">
+    <a class="brand" href="#/" aria-label="Q-TRACE start screen">${LOGO}<span>Q-TRACE</span></a>
+    <span class="pname">${esc(P.meta.name || "Untitled project")}</span>
+    <span class="saved" id="saved">Saved in this browser</span>
+  </div></header>
+  <div class="shell">
+    <div class="side"><nav aria-label="Project sections">
+      <ul><li><a href="#/project"${is("project")}><span class="num" aria-hidden="true">P</span>Project</a></li></ul>
+      <div class="lbl" id="lbl-stages">Stages</div>
+      <ol aria-labelledby="lbl-stages">${STAGES.map(s => {
+        const st = P.stages[s.n].status;
+        return `<li><a href="#/stage/${s.n}"${is("stage", s.n)}><span class="num ${st}" aria-hidden="true">${s.n}</span><span class="long">${esc(s.title)}</span><span class="short">${esc(s.short)}</span><span class="sr"> (stage ${s.n}${st ? ", " + STATUS[st].toLowerCase() : ", no status yet"})</span></a></li>`;
+      }).join("")}</ol>
+      <div class="lbl" id="lbl-record">Record</div>
+      <ul aria-labelledby="lbl-record">
+        <li><a href="#/items"${itemsCur}><span class="num" aria-hidden="true">${P.items.length}</span>Item table</a></li>
+        <li><a href="#/export"${is("export")}><span class="num" aria-hidden="true">↓</span>Export &amp; import</a></li>
+      </ul>
+    </nav></div>
+    <main id="main" tabindex="-1">${body}</main>
+  </div>`;
+}
+
+function viewHome() {
+  return `
+  <header class="top"><div class="top-in"><a class="brand" href="#/" aria-label="Q-TRACE start screen">${LOGO}<span>Q-TRACE</span></a></div></header>
+  <main id="main" tabindex="-1" class="home">
+    <div class="eyebrow">Protocol and open tool</div>
+    <h1>Make the development of your trait questionnaire traceable.</h1>
+    <p class="lead">Q-TRACE lets you record, for each of eight stages, what you decided and why, and for each item where it came from, what evidence was collected about it, and which decision followed. Everything stays in your own browser: nothing is sent to a server.</p>
+    ${P ? `<div class="card"><div class="eyebrow">Project in this browser</div><h2 style="margin:0 0 .3rem">${esc(P.meta.name || "Untitled project")}</h2>
+      <p class="hint">Last saved ${esc((P.updatedAt || "").slice(0, 10))} · ${P.items.length} item${P.items.length === 1 ? "" : "s"}</p>
+      <a class="btn primary" href="#/project">Continue this project</a></div>` : ""}
+    <div class="actions">
+      <button class="btn ${P ? "" : "primary"}" data-act="newProject">New project</button>
+      <button class="btn" data-act="openFile">Open project (import file)</button>
+      <button class="btn" data-act="loadExample">Load example</button>
+      <input type="file" id="import-file" accept=".json,application/json" class="sr" tabindex="-1" aria-label="Import a Q-TRACE data file">
+    </div>
+    <div class="card"><div class="eyebrow">The eight stages</div>
+      <ol class="stagelist">${STAGES.map(s => `<li><span class="num" aria-hidden="true">${s.n}</span><span>${esc(s.title)}${s.recommended ? " (recommended)" : ""}</span></li>`).join("")}</ol>
+    </div>
+    <p class="hint">The example is a small fictional project with two facets and six items. Q-TRACE accompanies the paper on documenting early decisions in trait questionnaire development.</p>
+  </main>`;
+}
+
+function viewProject() {
+  const f = (id, label, path, type = "text", ph = "") => `<label for="${id}">${label}</label><input type="${type}" id="${id}" data-bind="${path}" value="${esc(getPath(P, path))}" placeholder="${esc(ph)}" autocomplete="off">`;
+  return `
+  <div class="eyebrow">Project</div>
+  <h1>Project information</h1>
+  <p class="lead">A few details that identify this development record. You can change them at any time.</p>
+  <div class="card">
+    ${f("m-name", "Name of the questionnaire", "meta.name")}
+    ${f("m-construct", "Construct", "meta.construct")}
+    ${f("m-pop", "Target population", "meta.population")}
+    <div class="grid2">
+      <div>${f("m-res", "Researchers", "meta.researchers")}</div>
+      <div>${f("m-date", "Date", "meta.date", "date")}</div>
+    </div>
+  </div>
+  <div class="pager"><a class="btn" href="#/">Start screen</a><a class="btn primary" href="#/stage/1">Stage 1: ${esc(STAGES[0].title)}</a></div>`;
+}
+
+/* ----- stage view ----- */
+function viewStage(n) {
+  const s = STAGES.find(x => x.n === n), st = P.stages[n];
+  const needsJust = (st.status === "deviation" || st.status === "na") && !st.justification.trim();
+  const prev = n > 1 ? `<a class="btn" href="#/stage/${n - 1}">← Stage ${n - 1}</a>` : `<a class="btn" href="#/project">← Project</a>`;
+  const next = n < 8 ? `<a class="btn primary" href="#/stage/${n + 1}">Stage ${n + 1} →</a>` : `<a class="btn primary" href="#/export">Export →</a>`;
+  return `
+  <div class="eyebrow">Stage ${n} of 8${s.recommended ? " · recommended" : ""}</div>
+  <h1>${esc(s.title)}</h1>
+  <p class="lead">${esc(s.intro)}</p>
+  ${n === 7 ? `<div class="note warn"><strong>Record coded summaries per item only, never transcripts.</strong> Interview data stay with the research team.</div>` : ""}
+
+  <div class="card">
+    <h2>Checklist</h2>
+    ${s.checklist.map((c, i) => `<label class="check" for="chk-${n}-${i}"><input type="checkbox" id="chk-${n}-${i}" data-bind="stages.${n}.checklist.${i}" ${st.checklist[i] ? "checked" : ""}><span>${esc(c)}</span></label>`).join("")}
+  </div>
+
+  ${stageExtra(n)}
+
+  <div class="card">
+    <h2>Default rule</h2>
+    <div class="rule"><div>${esc(s.rule)}</div><div class="src">Source: ${cite(s.sources)}${s.ruleNote ? ". " + esc(s.ruleNote) : ""}</div></div>
+    <fieldset>
+      <legend>Was the default rule followed?</legend>
+      <div class="choice">
+        ${Object.entries(STATUS).map(([k, v]) => `<label for="st-${n}-${k}"><input type="radio" name="status-${n}" id="st-${n}-${k}" value="${k}" data-bind="stages.${n}.status" data-rr ${st.status === k ? "checked" : ""}>${v}${k === "followed" ? "" : " (justify)"}</label>`).join("")}
+      </div>
+    </fieldset>
+    <label for="just-${n}">Justification</label>
+    <textarea id="just-${n}" data-bind="stages.${n}.justification" data-rr-blur placeholder="${n === 1 ? "Why is a new measure needed?" : "What did you decide in this stage, and why? A few sentences are enough."}">${esc(st.justification)}</textarea>
+    ${needsJust ? `<div class="note warn" role="alert">${st.status === "deviation" ? "A deviation" : "Marking the stage as not applicable"} needs a short justification.</div>` : ""}
+    ${n > 1 ? `<p style="margin-top:.9rem"><button class="btn small" data-act="returnFrom" data-stage="${n}">Record a return to an earlier stage…</button></p>` : ""}
+  </div>
+
+  ${s.tools.length ? `<div class="card"><h2>Guidance and tools</h2>
+    <ul class="links">${s.tools.map(k => `<li><a href="${TOOL[k].url}" target="_blank" rel="noopener noreferrer">${esc(TOOL[k].label)}<span class="sr"> (opens in a new tab)</span></a> ↗<span class="hint">${esc(TOOL[k].note)}</span></li>`).join("")}</ul>
+    ${n === 1 || n === 4 ? `<p class="hint">Q-TRACE does not run predictions itself. Use these public tools and record their outcome here.</p>` : ""}
+  </div>` : ""}
+
+  <div class="pager">${prev}${next}</div>`;
+}
+
+function stageExtra(n) {
+  if (n === 1) return `
+    <div class="card"><h2>Most similar existing measures</h2>
+      <p class="hint">List the measures that come closest and state, for each, why it cannot be reused, adapted, or extended.</p>
+      ${P.similarMeasures.length ? `<div class="tablewrap"><table><thead><tr><th scope="col">Measure</th><th scope="col">Limitation</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody>
+      ${P.similarMeasures.map((m, i) => `<tr>
+        <td><input type="text" id="sm-n-${m.id}" aria-label="Measure ${i + 1}: name" data-bind="similarMeasures.${i}.name" value="${esc(m.name)}"></td>
+        <td><textarea id="sm-l-${m.id}" aria-label="Measure ${i + 1}: limitation" data-bind="similarMeasures.${i}.limitation" style="min-height:3.2rem">${esc(m.limitation)}</textarea></td>
+        <td class="tight"><button class="btn small danger" data-act="delMeasure" data-i="${i}" aria-label="Remove measure ${i + 1}">Remove</button></td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="hint">No measures listed yet.</p>`}
+      <button class="btn small" data-act="addMeasure">Add a measure</button>
+    </div>`;
+
+  if (n === 2) {
+    const d = P.definitionDraft, last = P.definitions[P.definitions.length - 1];
+    const facetNames = P.facets.map(f => f.name).filter(Boolean);
+    const changed = !last || ["definition", "excludes", "relations", "timeframe"].some(k => (d[k] || "") !== (last[k] || "")) || JSON.stringify(facetNames) !== JSON.stringify(last.facets || []);
+    return `
+    <div class="card"><h2>Facets</h2>
+      <p class="hint">The intended number of items per facet in the final version is used for the counter in Stage 4.</p>
+      ${P.facets.length ? `<div class="tablewrap"><table><thead><tr><th scope="col">Facet</th><th scope="col">Intended items (final)</th><th scope="col">Items now</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody>
+      ${P.facets.map((f, i) => `<tr>
+        <td><input type="text" id="fc-n-${f.id}" aria-label="Facet ${i + 1}: name" data-bind="facets.${i}.name" data-rr-blur value="${esc(f.name)}"></td>
+        <td><input type="number" min="0" step="1" id="fc-i-${f.id}" aria-label="Facet ${i + 1}: intended number of items" data-bind="facets.${i}.intended" data-num value="${esc(f.intended)}" style="max-width:7rem;min-width:5rem"></td>
+        <td>${P.items.filter(x => x.facetId === f.id).length}</td>
+        <td class="tight"><button class="btn small danger" data-act="delFacet" data-i="${i}" aria-label="Remove facet ${i + 1}">Remove</button></td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="hint">No facets yet.</p>`}
+      <button class="btn small" data-act="addFacet">Add a facet</button>
+    </div>
+    <div class="card"><h2>Construct definition</h2>
+      <p class="hint">${last ? `Current version: <strong>version ${last.version}</strong> (${esc(last.date)}). Edit the fields and save to create version ${last.version + 1}; earlier versions stay in the record.` : "Fill in the fields and save the first version before you write items."}</p>
+      <label for="def-d">Definition</label><textarea id="def-d" data-bind="definitionDraft.definition" data-rr-blur>${esc(d.definition)}</textarea>
+      <label for="def-x">What the construct does not include (boundaries)</label><textarea id="def-x" data-bind="definitionDraft.excludes" data-rr-blur style="min-height:3.6rem">${esc(d.excludes)}</textarea>
+      <label for="def-r">Expected relations with other constructs, and their direction</label><textarea id="def-r" data-bind="definitionDraft.relations" data-rr-blur style="min-height:3.6rem">${esc(d.relations)}</textarea>
+      <label for="def-t">Generality and time frame</label><input type="text" id="def-t" data-bind="definitionDraft.timeframe" data-rr-blur value="${esc(d.timeframe)}">
+      <p style="margin-top:1rem" class="row">
+        <button class="btn primary" data-act="saveDefinition" ${changed && d.definition.trim() ? "" : "disabled"}>${last ? "Save as version " + (last.version + 1) : "Save version 1"}</button>
+        ${last && changed ? `<span class="badge warn">Unsaved changes since version ${last.version}</span>` : ""}
+        ${last && !changed ? `<span class="badge ok">Matches version ${last.version}</span>` : ""}
+      </p>
+      ${P.definitions.length ? `<h3 style="margin-top:1.2rem">Version history</h3>${definitionHistory()}` : ""}
+    </div>`;
+  }
+
+  if (n === 3) {
+    const th = P.population.themes;
+    const done = th.filter(t => (t.facetId && t.facetId !== "excluded") || (t.facetId === "excluded" && t.reason.trim())).length;
+    return `
+    <div class="card"><h2>Method and sample</h2>
+      <label for="pop-m" class="sr">Method and sample</label>
+      <textarea id="pop-m" data-bind="population.method" placeholder="E.g., two focus groups with members of the target population (n = 11).">${esc(P.population.method)}</textarea>
+    </div>
+    <div class="card"><h2>Themes</h2>
+      <p class="hint">Assign each theme to a facet from Stage 2, or exclude it with a reason.</p>
+      ${th.length ? `<div class="tablewrap"><table><thead><tr><th scope="col">Theme</th><th scope="col">Facet or excluded</th><th scope="col">Reason (if excluded)</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody>
+      ${th.map((t, i) => `<tr>
+        <td><input type="text" id="th-t-${t.id}" aria-label="Theme ${i + 1}" data-bind="population.themes.${i}.theme" value="${esc(t.theme)}"></td>
+        <td><select id="th-f-${t.id}" aria-label="Theme ${i + 1}: facet or excluded" data-bind="population.themes.${i}.facetId" data-rr>
+          <option value="">Not assigned yet</option>${P.facets.map(f => `<option value="${f.id}" ${t.facetId === f.id ? "selected" : ""}>${esc(f.name || "(unnamed facet)")}</option>`).join("")}
+          <option value="excluded" ${t.facetId === "excluded" ? "selected" : ""}>Excluded</option></select></td>
+        <td><input type="text" id="th-r-${t.id}" aria-label="Theme ${i + 1}: reason for exclusion" data-bind="population.themes.${i}.reason" data-rr-blur value="${esc(t.reason)}" ${t.facetId === "excluded" ? "" : "disabled"}></td>
+        <td class="tight"><button class="btn small danger" data-act="delTheme" data-i="${i}" aria-label="Remove theme ${i + 1}">Remove</button></td></tr>`).join("")}
+      </tbody></table></div>
+      <p><span class="badge ${done === th.length ? "ok" : "warn"}">${done} of ${th.length} themes assigned to a facet or excluded with a reason</span></p>` : `<p class="hint">No themes yet.</p>`}
+      ${!P.facets.length ? `<p class="hint">Define the facets in <a href="#/stage/2">Stage 2</a> first.</p>` : ""}
+      <button class="btn small" data-act="addTheme">Add a theme</button>
+    </div>`;
+  }
+
+  if (n === 4) {
+    const cov = facetCoverage();
+    const noSource = P.items.filter(i => !i.source || !i.source.type).length;
+    const overlaps = P.evidence.filter(e => e.type === "overlap");
+    return `
+    <div class="card"><h2>Items per facet</h2>
+      ${cov.rows.length ? `<div class="tablewrap"><table><thead><tr><th scope="col">Facet</th><th scope="col">Items in pool</th><th scope="col">Intended (final)</th><th scope="col">Needed (2×)</th><th scope="col">Default rule</th></tr></thead><tbody>
+      ${cov.rows.map(r => `<tr><th scope="row" style="text-transform:none;letter-spacing:0;font-size:.9rem;background:none;color:var(--ink)">${esc(r.f.name || "(unnamed facet)")}</th><td>${r.n}</td><td>${r.intended || "–"}</td><td>${r.intended ? r.required : "–"}</td>
+        <td>${r.ok === null ? `<span class="badge">Set the intended number in Stage 2</span>` : r.ok ? `<span class="badge ok">Met</span>` : `<span class="badge warn">${r.required - r.n} more needed</span>`}</td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="hint">Define the facets in <a href="#/stage/2">Stage 2</a> first.</p>`}
+      ${cov.none ? `<p class="hint">${cov.none} item${cov.none === 1 ? " has" : "s have"} no facet.</p>` : ""}
+      <p class="hint">The counter includes every item in the pool, also items that were removed later.</p>
+      ${noSource ? `<div class="note warn">${noSource} item${noSource === 1 ? " has" : "s have"} no recorded source.</div>` : ""}
+      <p class="row"><a class="btn primary" href="#/items">Open the item table</a><button class="btn" data-act="newItem" data-stage="4">Add an item</button></p>
+    </div>
+    <div class="card"><h2>Overlap signals</h2>
+      <p class="hint">For the items with the highest predicted overlap, record whether the overlap was expected and what was decided.</p>
+      ${evidenceTable(overlaps, true)}
+      <button class="btn small" data-act="newEvidence" data-type="overlap">Add an overlap signal</button>
+    </div>`;
+  }
+
+  if (n === 5) return `
+    <div class="card"><h2>Response format and instructions</h2>
+      <label for="fmt-r">Response format</label><input type="text" id="fmt-r" data-bind="format.response" value="${esc(P.format.response)}" placeholder="E.g., five-point frequency scale">
+      <label for="fmt-l">Labels</label><input type="text" id="fmt-l" data-bind="format.labels" value="${esc(P.format.labels)}" placeholder="E.g., 1 = never … 5 = always, all options labelled">
+      <label for="fmt-i">Instructions</label><textarea id="fmt-i" data-bind="format.instructions" placeholder="The instruction that respondents read.">${esc(P.format.instructions)}</textarea>
+      <p class="hint">Give the reasons for these choices in the justification below.</p>
+    </div>`;
+
+  if (n === 6) return `
+    <div class="card"><h2>Expert ratings: upload and calculation</h2>
+      <p>Upload a CSV file with one row per expert per item and the columns <span class="mono">expert_id</span>, <span class="mono">expert_type</span> (domain or population), <span class="mono">item_id</span>, <span class="mono">item_version</span>, <span class="mono">relevance</span> (1–4) and <span class="mono">comment</span>.</p>
+      <p class="hint">Ratings of 3 and 4 count as relevant. I-CVI = number of experts rating 3 or 4 ÷ number of experts who rated the item. S-CVI/Ave = the mean of the I-CVIs. The file is read in your browser and is not sent anywhere.</p>
+      <p class="row">
+        <button class="btn primary" data-act="pickCsv">Upload ratings (CSV)</button>
+        <input type="file" id="csv-file" accept=".csv,text/csv" class="sr" tabindex="-1" aria-label="Upload expert ratings as a CSV file">
+        <button class="btn" data-act="downloadExampleCsv">Download example CSV</button>
+      </p>
+      <p class="hint">The example CSV matches the items of the example project (Load example on the start screen).</p>
+    </div>
+    ${P.cviUploads.slice().reverse().map(u => cviCard(u)).join("")}`;
+
+  if (n === 7) {
+    const iv = P.evidence.filter(e => e.type === "interview");
+    return `
+    <div class="card"><h2>Interview findings per item</h2>
+      <p class="hint">One coded summary per item version that was tested, for example the type of problem, its severity, and in how many interviews it occurred.</p>
+      ${evidenceTable(iv, true)}
+      <button class="btn small" data-act="newEvidence" data-type="interview">Add an interview finding</button>
+    </div>`;
+  }
+
+  if (n === 8) {
+    const dev = deviations(7);
+    const rows = P.items.map(it => ({ it, d: itemStatus(it.id) }));
+    const missing = rows.filter(r => !r.d).length;
+    return `
+    <div class="card"><h2>Deviations from the default rules (Stages 1–7)</h2>
+      ${dev.length ? `<div class="tablewrap"><table><thead><tr><th scope="col">Stage</th><th scope="col">Status</th><th scope="col" style="min-width:15rem">Justification</th></tr></thead><tbody>
+      ${dev.map(x => `<tr><td><a href="#/stage/${x.s.n}">${x.s.n}. ${esc(x.s.title)}</a></td><td><span class="badge ${x.st.status === "deviation" ? "warn" : ""}">${STATUS[x.st.status]}</span></td>
+        <td>${x.st.justification.trim() ? nl2br(x.st.justification) : `<span class="badge bad">No justification yet</span>`}</td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="hint">No deviations recorded in Stages 1–7.</p>`}
+      ${STAGES.filter(s => s.n < 8 && !P.stages[s.n].status).length ? `<p class="hint">No status recorded yet for stage ${STAGES.filter(s => s.n < 8 && !P.stages[s.n].status).map(s => s.n).join(", ")}.</p>` : ""}
+    </div>
+    <div class="card"><h2>Final status per item</h2>
+      ${rows.length ? `<div class="tablewrap"><table><thead><tr><th scope="col">Item</th><th scope="col" style="min-width:13rem">Current wording</th><th scope="col">Status</th><th scope="col" style="min-width:15rem">Reason and evidence given most weight</th></tr></thead><tbody>
+      ${rows.map(r => `<tr><td class="tight"><a href="#/items/${encodeURIComponent(r.it.id)}" class="mono">${esc(r.it.id)}</a> <span class="hint">v${curVersion(r.it).v}</span></td><td>${esc(curVersion(r.it).text)}</td>
+        <td>${r.d ? statusBadge(r.d.type) + ` <span class="hint">stage ${r.d.stage}</span>` : `<span class="badge bad">No decision yet</span>`}</td>
+        <td>${r.d ? esc(r.d.reason) + (r.d.weight ? `<br><span class="hint">Most weight: ${esc(r.d.weight)}</span>` : "") : ""}</td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="hint">No items yet.</p>`}
+      ${missing ? `<div class="note warn">${missing} item${missing === 1 ? " has" : "s have"} no decision yet.</div>` : ""}
+      <p class="row"><button class="btn" data-act="newDecision" data-stage="8">Record a decision</button><a class="btn" href="#/items">Open the item table</a></p>
+    </div>
+    <div class="card"><h2>Final version</h2>
+      <p class="hint">Creating a final version stores a numbered snapshot of all items that are not removed or merged, ready for pilot testing.</p>
+      ${P.releases.length ? P.releases.slice().reverse().map(r => `<details class="note ok"><summary><strong>Version ${esc(r.version)}</strong> · ${esc(r.date)} · ${r.items.length} items${r.note ? " · " + esc(r.note) : ""}</summary>
+        <ol>${r.items.map(i => `<li><span class="mono">${esc(i.itemId)}</span> v${i.v} — ${esc(i.text)} <span class="hint">(${esc(i.facet)})</span></li>`).join("")}</ol></details>`).join("") : ""}
+      <button class="btn primary" data-act="createRelease">Create final version</button>
+    </div>`;
+  }
+  return "";
+}
+
+function definitionHistory() {
+  return P.definitions.slice().reverse().map(v => `<details class="note"><summary><strong>Version ${v.version}</strong> · ${esc(v.date)}${v.reason ? " · " + esc(cut(v.reason, 90)) : ""}</summary>
+    <p><strong>Definition.</strong> ${nl2br(v.definition)}</p>
+    ${v.excludes ? `<p><strong>Not included.</strong> ${nl2br(v.excludes)}</p>` : ""}
+    ${v.relations ? `<p><strong>Expected relations.</strong> ${nl2br(v.relations)}</p>` : ""}
+    ${v.timeframe ? `<p><strong>Generality and time frame.</strong> ${esc(v.timeframe)}</p>` : ""}
+    ${v.facets && v.facets.length ? `<p><strong>Facets.</strong> ${esc(v.facets.join("; "))}</p>` : ""}
+    ${v.reason ? `<p><strong>Reason for this version.</strong> ${nl2br(v.reason)}</p>` : ""}</details>`).join("");
+}
+
+function statusBadge(type) {
+  const cls = type === "removed" || type === "merged" ? "bad" : type === "revised" ? "warn" : "ok";
+  return `<span class="badge ${cls}">${esc(DECISION_TYPES[type] || type)}</span>`;
+}
+
+function evidenceTable(list, withItem) {
+  if (!list.length) return `<p class="hint">Nothing recorded yet.</p>`;
+  return `<div class="tablewrap"><table><thead><tr>${withItem ? `<th scope="col">Item</th>` : ""}<th scope="col">Finding</th><th scope="col">Date</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody>
+    ${list.map(e => `<tr>${withItem ? `<td class="tight"><a class="mono" href="#/items/${encodeURIComponent(e.itemId)}">${esc(e.itemId)}</a> <span class="hint">v${e.version}</span></td>` : ""}
+      <td>${esc(e.summary)}${e.type === "overlap" && e.expected ? ` <span class="badge ${e.expected === "no" ? "warn" : ""}">Overlap ${e.expected === "yes" ? "expected" : e.expected === "no" ? "not expected" : "unclear"}</span>` : ""}</td>
+      <td class="tight">${esc(e.date)}</td><td class="tight"><button class="btn small danger" data-act="delEvidence" data-id="${e.id}" aria-label="Remove this finding for ${esc(e.itemId)}">Remove</button></td></tr>`).join("")}
+  </tbody></table></div>`;
+}
+
+function cviCard(u) {
+  const flagged = u.results.filter(r => r.icvi < 0.78);
+  const unlinked = u.results.filter(r => !r.linked);
+  return `<div class="card">
+    <h2>${esc(u.filename)} <span class="hint" style="font-family:var(--sans);font-weight:400">· uploaded ${esc(u.date)}</span></h2>
+    <p class="row">
+      <span class="badge">${u.nExperts} expert${u.nExperts === 1 ? "" : "s"} (${u.nDomain} domain, ${u.nPopulation} population)</span>
+      <span class="badge ${u.sCviAve >= 0.9 ? "ok" : "warn"}">S-CVI/Ave = ${fmtCvi(u.sCviAve)}${u.sCviAve >= 0.9 ? "" : " (below the recommended .90)"}</span>
+      <span class="badge ${flagged.length ? "bad" : "ok"}">${flagged.length} item${flagged.length === 1 ? "" : "s"} below .78</span>
+    </p>
+    ${u.nExperts < 6 ? `<div class="note warn" role="alert"><strong>Fewer than six experts.</strong> The cut-off of .78 applies to panels of at least six experts; with ${u.nExperts}, agreement may reflect chance.</div>` : ""}
+    ${u.nExperts >= 6 && u.results.some(r => r.n < 6) ? `<div class="note warn">Some items were rated by fewer than six experts (see the table).</div>` : ""}
+    ${!u.nDomain || !u.nPopulation ? `<div class="note warn">The panel contains no ${!u.nDomain ? "domain experts" : "people who know the target population"}. Q-TRACE advises including both.</div>` : ""}
+    ${unlinked.length ? `<div class="note bad" role="alert">${unlinked.length} result${unlinked.length === 1 ? " was" : "s were"} not linked to an item version: ${unlinked.map(r => esc(r.itemId) + " v" + r.version + " (" + esc(r.reason) + ")").join("; ")}. Check the item IDs and versions in the item table.</div>` : ""}
+    ${u.problems.length ? `<details class="note warn"><summary>${u.problems.length} remark${u.problems.length === 1 ? "" : "s"} about the file</summary><ul>${u.problems.map(p => `<li>${esc(p)}</li>`).join("")}</ul></details>` : ""}
+    <div class="tablewrap"><table><thead><tr><th scope="col">Item</th><th scope="col">Version</th><th scope="col">Experts</th><th scope="col">Rated 3 or 4</th><th scope="col">I-CVI</th><th scope="col">Default rule</th><th scope="col">Decision on this version</th></tr></thead><tbody>
+    ${u.results.map(r => {
+      const decs = r.linked ? P.decisions.filter(d => d.type !== "return" && d.targets.some(t => t.itemId === r.itemId && t.version === r.version)) : [];
+      return `<tr><td class="tight">${r.linked ? `<a class="mono" href="#/items/${encodeURIComponent(r.itemId)}">${esc(r.itemId)}</a>` : `<span class="mono">${esc(r.itemId)}</span>`}</td><td>v${r.version}</td>
+        <td>${r.n}${r.n < 6 ? ` <span class="badge warn">&lt; 6</span>` : ""}</td><td>${r.relevant}</td><td><strong>${fmtCvi(r.icvi)}</strong></td>
+        <td>${r.icvi < 0.78 ? `<span class="badge bad">Below .78: reconsider</span>` : `<span class="badge ok">At or above .78</span>`}</td>
+        <td>${!r.linked ? `<span class="badge bad">Not linked</span>` : decs.length ? decs.map(d => statusBadge(d.type)).join(" ") : (r.icvi < 0.78 ? `<a href="#/items/${encodeURIComponent(r.itemId)}">Record a decision</a>` : `<span class="hint">–</span>`)}</td></tr>`;
+    }).join("")}
+    </tbody></table></div>
+    <p><button class="btn small danger" data-act="delUpload" data-id="${u.id}">Remove this upload</button></p>
+  </div>`;
+}
+
+/* ----- item table ----- */
+function viewItems() {
+  const defWarn = !P.definitions.length ? `<div class="note warn">No construct definition has been saved yet. The default rule of Stage 2 is that items are written only after the construct, its facets, and its boundaries have been defined. <a href="#/stage/2">Go to Stage 2</a>.</div>` : "";
+  return `
+  <div class="eyebrow">Record</div>
+  <h1>Item table</h1>
+  <p class="lead">Every item has an identifier, a source, and a track record of its versions. Evidence and decisions are linked to the item version, so the history of each item stays traceable.</p>
+  ${defWarn}
+  <p class="row"><button class="btn primary" data-act="newItem">Add an item</button><button class="btn" data-act="newDecision">Record a decision</button><button class="btn" data-act="newEvidence">Add evidence</button></p>
+  ${P.items.length ? `<div class="tablewrap"><table><thead><tr><th scope="col">ID</th><th scope="col">Facet</th><th scope="col" style="min-width:15rem">Current wording</th><th scope="col" style="min-width:11rem">Source</th><th scope="col">Version</th><th scope="col">Status</th><th scope="col">Evidence</th></tr></thead><tbody>
+  ${P.items.map(it => { const d = itemStatus(it.id), cv = curVersion(it); return `<tr>
+    <td class="tight"><a class="mono" href="#/items/${encodeURIComponent(it.id)}">${esc(it.id)}</a></td>
+    <td>${esc(facetName(it.facetId))}</td><td>${esc(cv.text)}</td><td>${esc(cut(sourceText(it.source), 60))}</td>
+    <td class="tight">v${cv.v}</td><td>${d ? statusBadge(d.type) : `<span class="badge">No decision</span>`}</td>
+    <td>${P.evidence.filter(e => e.itemId === it.id).length}</td></tr>`; }).join("")}
+  </tbody></table></div>` : `<div class="card"><p class="hint">No items yet. Add the first item of the initial pool.</p></div>`}
+
+  <h2>Decision log</h2>
+  <p class="hint">All decisions in order, including decisions that apply to several items at once and returns to an earlier stage.</p>
+  ${P.decisions.length ? `<div class="tablewrap"><table><thead><tr><th scope="col">Date</th><th scope="col">Stage</th><th scope="col">Decision</th><th scope="col">Items</th><th scope="col" style="min-width:16rem">Reason</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody>
+  ${P.decisions.map(d => `<tr><td class="tight">${esc(d.date)}</td><td class="tight">${d.stage}${d.type === "return" ? " → " + d.returnTo : ""}</td><td>${d.type === "return" ? `<span class="badge">Return to stage ${d.returnTo}</span>` : statusBadge(d.type)}</td>
+    <td>${d.targets.length ? d.targets.map(t => `<a class="mono" href="#/items/${encodeURIComponent(t.itemId)}">${esc(t.itemId)}</a> <span class="hint">v${t.version}</span>`).join(", ") : `<span class="hint">–</span>`}</td>
+    <td>${esc(d.reason)}${d.weight ? `<br><span class="hint">Most weight: ${esc(d.weight)}</span>` : ""}</td>
+    <td class="tight"><button class="btn small danger" data-act="delDecision" data-id="${d.id}" aria-label="Remove the decision of ${esc(d.date)}">Remove</button></td></tr>`).join("")}
+  </tbody></table></div>` : `<p class="hint">No decisions recorded yet.</p>`}
+  <div class="pager"><a class="btn" href="#/stage/8">← Stage 8</a><a class="btn primary" href="#/export">Export →</a></div>`;
+}
+
+function itemTimeline(it) {
+  // source → versions → evidence → decisions, in order per version
+  let html = `<li><div class="kind">Source</div><div>${esc(sourceText(it.source))}</div></li>`;
+  it.versions.forEach(v => {
+    html += `<li><div class="kind">Version ${v.v}</div><div class="when">${esc(v.date)}${v.defVersion ? " · written under construct definition version " + v.defVersion : ""}</div><div class="itemtext">${esc(v.text)}</div></li>`;
+    P.evidence.filter(e => e.itemId === it.id && e.version === v.v).forEach(e => {
+      html += `<li class="ev"><div class="kind">Evidence · ${esc(EVIDENCE_TYPES[e.type] || e.type)} · stage ${e.stage}</div><div class="when">${esc(e.date)}</div><div>${esc(e.summary)}${e.type === "overlap" && e.expected ? ` <span class="badge ${e.expected === "no" ? "warn" : ""}">Overlap ${e.expected === "yes" ? "expected" : e.expected === "no" ? "not expected" : "unclear"}</span>` : ""}</div>
+        ${e.data && e.data.comments && e.data.comments.length ? `<details><summary class="hint">${e.data.comments.length} expert comment${e.data.comments.length === 1 ? "" : "s"}</summary><ul>${e.data.comments.map(c => `<li>${esc(c.expert_id)} (${esc(c.expert_type)}, rated ${c.relevance}): ${esc(c.comment)}</li>`).join("")}</ul></details>` : ""}
+        ${e.uploadId ? "" : `<button class="btn small danger" data-act="delEvidence" data-id="${e.id}" aria-label="Remove this evidence">Remove</button>`}</li>`;
+    });
+    P.decisions.filter(d => d.targets.some(t => t.itemId === it.id && t.version === v.v)).forEach(d => {
+      const others = d.targets.filter(t => t.itemId !== it.id);
+      const evs = (d.evidenceIds || []).map(id => P.evidence.find(e => e.id === id)).filter(Boolean);
+      html += `<li class="dec"><div class="kind">Decision · stage ${d.stage}</div><div class="when">${esc(d.date)}</div>
+        <div>${d.type === "return" ? `<span class="badge">Return to stage ${d.returnTo}</span>` : statusBadge(d.type)}${d.resultVersion ? ` <span class="hint">→ version ${d.resultVersion}</span>` : ""}${d.mergedInto ? ` <span class="hint">→ merged into ${esc(d.mergedInto)}</span>` : ""} ${esc(d.reason)}</div>
+        ${d.weight ? `<div class="hint">Evidence given most weight: ${esc(d.weight)}</div>` : ""}
+        ${evs.length ? `<div class="hint">Based on: ${evs.map(e => esc(e.itemId) + " v" + e.version + " — " + esc(cut(e.summary, 80))).join("; ")}</div>` : ""}
+        ${others.length ? `<div class="hint">Also applies to: ${others.map(t => `<a href="#/items/${encodeURIComponent(t.itemId)}">${esc(t.itemId)}</a>`).join(", ")}</div>` : ""}</li>`;
+    });
+  });
+  return html;
+}
+
+function viewItem(id) {
+  const it = getItem(id), cv = curVersion(it), d = itemStatus(id);
+  return `
+  <p><a href="#/items">← Item table</a></p>
+  <div class="eyebrow">Item record</div>
+  <h1><span class="mono" style="font-size:.85em">${esc(it.id)}</span> ${d ? statusBadge(d.type) : ""}</h1>
+  <div class="card">
+    <div class="hint">Current wording · version ${cv.v} · ${esc(facetName(it.facetId))}</div>
+    <p class="itemtext">${esc(cv.text)}</p>
+    <p class="row">
+      <button class="btn primary" data-act="editItem" data-id="${esc(it.id)}">Edit wording (new version)</button>
+      <button class="btn" data-act="newEvidence" data-id="${esc(it.id)}">Add evidence</button>
+      <button class="btn" data-act="newDecision" data-id="${esc(it.id)}">Record a decision</button>
+      <button class="btn" data-act="editItemMeta" data-id="${esc(it.id)}">Facet and source</button>
+    </p>
+  </div>
+  <h2>History</h2>
+  <ol class="timeline">${itemTimeline(it)}</ol>
+  <p style="margin-top:2rem"><button class="btn small danger" data-act="delItem" data-id="${esc(it.id)}">Delete this item from the record</button>
+  <span class="hint"> Only for entries made by mistake. To drop an item from the questionnaire, record the decision “Removed”.</span></p>`;
+}
+
+/* ----- export view ----- */
+function viewExport() {
+  return `
+  <div class="eyebrow">Record</div>
+  <h1>Export and import</h1>
+  <p class="lead">Export the development record as a readable report and as a data file. The report shows, for each stage, the justification and the default rule, and for each item its full history: source, versions, evidence, and decisions.</p>
+  <div class="card"><h2>Export report</h2>
+    <p>A readable HTML report. Open it to print it or save it as a PDF.</p>
+    <p class="row"><button class="btn primary" data-act="exportReport">Export report</button><button class="btn" data-act="printReport">Print or save as PDF</button></p>
+  </div>
+  <div class="card"><h2>Export data file</h2>
+    <p>One JSON file with the whole project. Import opens that file again, here or in another browser.</p>
+    <p class="row"><button class="btn primary" data-act="exportData">Export data file</button></p>
+    <div class="note ok">Archive this file in an open repository (e.g., Zenodo, OSF, Open Test Archive).</div>
+  </div>
+  <div class="card"><h2>Import</h2>
+    <p>Open a Q-TRACE data file. It replaces the project that is now in this browser, so export that first if you want to keep it.</p>
+    <p class="row"><button class="btn" data-act="openFile">Import</button>
+    <input type="file" id="import-file" accept=".json,application/json" class="sr" tabindex="-1" aria-label="Import a Q-TRACE data file"></p>
+  </div>
+  <div class="card"><h2>Where the data are</h2>
+    <p>All project data are stored locally in this browser and are not sent to a server. Clearing the browser data removes the project, so keep an exported data file.</p>
+    <p class="row"><button class="btn small danger" data-act="clearProject">Remove the project from this browser</button></p>
+  </div>
+  <div class="pager"><a class="btn" href="#/items">← Item table</a><a class="btn" href="#/">Start screen</a></div>`;
+}
+
+/* ---------- report ---------- */
+function buildReport() {
+  const m = P.meta;
+  const stageBlock = s => {
+    const st = P.stages[s.n];
+    let extra = "";
+    if (s.n === 1 && P.similarMeasures.length) extra = `<h4>Most similar existing measures</h4><table><thead><tr><th>Measure</th><th>Limitation</th></tr></thead><tbody>${P.similarMeasures.map(x => `<tr><td>${esc(x.name)}</td><td>${nl2br(x.limitation)}</td></tr>`).join("")}</tbody></table>`;
+    if (s.n === 2) extra = (P.facets.length ? `<h4>Facets</h4><ul>${P.facets.map(f => `<li>${esc(f.name)}${f.intended ? " (intended items in the final version: " + esc(f.intended) + ")" : ""}</li>`).join("")}</ul>` : "") +
+      (P.definitions.length ? `<h4>Construct definition: all versions</h4>${P.definitions.map(v => `<div class="box"><p><strong>Version ${v.version}</strong> · ${esc(v.date)}</p><p><em>Definition.</em> ${nl2br(v.definition)}</p>${v.excludes ? `<p><em>Not included.</em> ${nl2br(v.excludes)}</p>` : ""}${v.relations ? `<p><em>Expected relations.</em> ${nl2br(v.relations)}</p>` : ""}${v.timeframe ? `<p><em>Generality and time frame.</em> ${esc(v.timeframe)}</p>` : ""}${v.facets && v.facets.length ? `<p><em>Facets.</em> ${esc(v.facets.join("; "))}</p>` : ""}${v.reason ? `<p><em>Reason for this version.</em> ${nl2br(v.reason)}</p>` : ""}</div>`).join("")}` : `<p class="muted">No construct definition was saved.</p>`);
+    if (s.n === 3) extra = (P.population.method ? `<h4>Method and sample</h4><p>${nl2br(P.population.method)}</p>` : "") +
+      (P.population.themes.length ? `<h4>Themes</h4><table><thead><tr><th>Theme</th><th>Facet or excluded</th><th>Reason</th></tr></thead><tbody>${P.population.themes.map(t => `<tr><td>${esc(t.theme)}</td><td>${t.facetId === "excluded" ? "Excluded" : t.facetId ? esc(facetName(t.facetId)) : "Not assigned"}</td><td>${esc(t.reason)}</td></tr>`).join("")}</tbody></table>` : "");
+    if (s.n === 4) { const c = facetCoverage(); extra = c.rows.length ? `<h4>Items per facet</h4><table><thead><tr><th>Facet</th><th>Items in pool</th><th>Intended (final)</th><th>Needed (2×)</th><th>Default rule</th></tr></thead><tbody>${c.rows.map(r => `<tr><td>${esc(r.f.name)}</td><td>${r.n}</td><td>${r.intended || "–"}</td><td>${r.intended ? r.required : "–"}</td><td>${r.ok === null ? "–" : r.ok ? "Met" : "Not met"}</td></tr>`).join("")}</tbody></table>` : ""; }
+    if (s.n === 5) extra = `<h4>Response format and instructions</h4><table><tbody><tr><th>Response format</th><td>${esc(P.format.response) || "–"}</td></tr><tr><th>Labels</th><td>${esc(P.format.labels) || "–"}</td></tr><tr><th>Instructions</th><td>${nl2br(P.format.instructions) || "–"}</td></tr></tbody></table>`;
+    if (s.n === 6) extra = P.cviUploads.map(u => `<h4>Expert ratings: ${esc(u.filename)} (${esc(u.date)})</h4>
+      <p>${u.nExperts} experts (${u.nDomain} domain, ${u.nPopulation} population). S-CVI/Ave = ${fmtCvi(u.sCviAve)}. Ratings of 3 and 4 count as relevant; I-CVI = experts rating 3 or 4 ÷ experts who rated the item; S-CVI/Ave = mean of the I-CVIs.${u.nExperts < 6 ? " <strong>Fewer than six experts: the cut-off of .78 applies to panels of at least six.</strong>" : ""}</p>
+      <table><thead><tr><th>Item</th><th>Version</th><th>Experts</th><th>Rated 3 or 4</th><th>I-CVI</th><th>Below .78</th></tr></thead><tbody>${u.results.map(r => `<tr><td>${esc(r.itemId)}</td><td>v${r.version}</td><td>${r.n}</td><td>${r.relevant}</td><td>${fmtCvi(r.icvi)}</td><td>${r.icvi < 0.78 ? "Yes" : "No"}</td></tr>`).join("")}</tbody></table>`).join("");
+    if (s.n === 7) { const iv = P.evidence.filter(e => e.type === "interview"); extra = iv.length ? `<h4>Interview findings (coded summaries)</h4><table><thead><tr><th>Item</th><th>Version</th><th>Finding</th><th>Date</th></tr></thead><tbody>${iv.map(e => `<tr><td>${esc(e.itemId)}</td><td>v${e.version}</td><td>${esc(e.summary)}</td><td>${esc(e.date)}</td></tr>`).join("")}</tbody></table>` : ""; }
+    if (s.n === 8) extra = P.releases.map(r => `<h4>Final version ${esc(r.version)} (${esc(r.date)})</h4>${r.note ? `<p>${esc(r.note)}</p>` : ""}<ol>${r.items.map(i => `<li>${esc(i.text)} <span class="muted">[${esc(i.itemId)} v${i.v}, ${esc(i.facet)}]</span></li>`).join("")}</ol>`).join("");
+    return `<section><h3>Stage ${s.n}. ${esc(s.title)}${s.recommended ? " (recommended)" : ""}</h3>
+      <p><strong>Default rule.</strong> ${esc(s.rule)} <span class="muted">(${esc(citePlain(s.sources))})</span></p>
+      <p><strong>Status.</strong> <span class="st ${st.status}">${st.status ? STATUS[st.status] : "Not recorded"}</span></p>
+      <p><strong>Justification.</strong> ${st.justification.trim() ? nl2br(st.justification) : `<span class="muted">None recorded.</span>`}</p>
+      <p><strong>Checklist.</strong></p><ul class="cl">${s.checklist.map((c, i) => `<li>${st.checklist[i] ? "☑" : "☐"} ${esc(c)}</li>`).join("")}</ul>${extra}</section>`;
+  };
+  const dev = deviations(8);
+  const itemBlock = it => {
+    const d = itemStatus(it.id);
+    let rows = `<li><strong>Source.</strong> ${esc(sourceText(it.source))}</li>`;
+    it.versions.forEach(v => {
+      rows += `<li><strong>Version ${v.v}</strong> (${esc(v.date)}${v.defVersion ? "; construct definition version " + v.defVersion : ""}): “${esc(v.text)}”<ul>`;
+      P.evidence.filter(e => e.itemId === it.id && e.version === v.v).forEach(e => {
+        rows += `<li><em>Evidence, ${esc((EVIDENCE_TYPES[e.type] || e.type).toLowerCase())}, stage ${e.stage}, ${esc(e.date)}:</em> ${esc(e.summary)}${e.type === "overlap" && e.expected ? " Overlap " + (e.expected === "yes" ? "expected" : e.expected === "no" ? "not expected" : "unclear") + "." : ""}${e.data && e.data.comments && e.data.comments.length ? `<ul>${e.data.comments.map(c => `<li>${esc(c.expert_id)} (${esc(c.expert_type)}, rated ${c.relevance}): ${esc(c.comment)}</li>`).join("")}</ul>` : ""}</li>`;
+      });
+      P.decisions.filter(x => x.targets.some(t => t.itemId === it.id && t.version === v.v)).forEach(x => {
+        const others = x.targets.filter(t => t.itemId !== it.id).map(t => t.itemId);
+        rows += `<li><em>Decision, stage ${x.stage}, ${esc(x.date)}:</em> <strong>${x.type === "return" ? "Return to stage " + x.returnTo : esc(DECISION_TYPES[x.type])}</strong>${x.resultVersion ? " (→ version " + x.resultVersion + ")" : ""}${x.mergedInto ? " (→ merged into " + esc(x.mergedInto) + ")" : ""}. ${esc(x.reason)}${x.weight ? " <em>Evidence given most weight:</em> " + esc(x.weight) : ""}${others.length ? ` <span class="muted">Also applies to: ${esc(others.join(", "))}.</span>` : ""}</li>`;
+      });
+      rows += `</ul></li>`;
+    });
+    return `<section class="item"><h3>${esc(it.id)} <span class="muted">· ${esc(facetName(it.facetId))} · ${d ? "final status: " + esc(DECISION_TYPES[d.type].toLowerCase()) : "no decision recorded"}</span></h3><ul>${rows}</ul></section>`;
+  };
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q-TRACE development record: ${esc(m.name || "Untitled project")}</title>
+<style>
+body{font-family:Georgia,"Times New Roman",serif;color:#1c232b;line-height:1.5;max-width:820px;margin:2rem auto;padding:0 1.2rem;font-size:15.5px}
+h1{font-size:1.7rem;margin:0 0 .3rem}h2{font-size:1.25rem;border-bottom:2px solid #2f5639;padding-bottom:.2rem;margin-top:2.2rem}h3{font-size:1.05rem;margin:1.4rem 0 .3rem}h4{font-size:.95rem;margin:1rem 0 .3rem}
+table{border-collapse:collapse;width:100%;font-size:.9em;margin:.4rem 0}th,td{border:1px solid #c9ced6;padding:.3rem .5rem;text-align:left;vertical-align:top}th{background:#f1f3f5}
+.muted{color:#4d5866;font-weight:400}.box{border:1px solid #c9ced6;border-radius:6px;padding:.2rem .8rem;margin:.5rem 0}.cl{list-style:none;padding-left:.2rem}
+.st{font-weight:700}.st.deviation{color:#7a4d00}.st.na{color:#4d5866}.st.followed{color:#1f3526}
+section{break-inside:avoid-page}.item ul{margin:.2rem 0}.bar{font-family:system-ui,sans-serif;margin-bottom:1.5rem}
+.bar button{font:inherit;padding:.5rem .9rem;border-radius:8px;border:1px solid #2f5639;background:#2f5639;color:#fff;cursor:pointer}
+@media print{.bar{display:none}body{margin:0;max-width:none;font-size:11pt}a{color:inherit;text-decoration:none}}
+</style></head><body>
+<div class="bar"><button onclick="window.print()">Print or save as PDF</button></div>
+<h1>Q-TRACE development record</h1>
+<p><strong>${esc(m.name || "Untitled project")}</strong></p>
+<table><tbody>
+<tr><th>Construct</th><td>${esc(m.construct) || "–"}</td></tr><tr><th>Target population</th><td>${esc(m.population) || "–"}</td></tr>
+<tr><th>Researchers</th><td>${esc(m.researchers) || "–"}</td></tr><tr><th>Project date</th><td>${esc(m.date) || "–"}</td></tr>
+<tr><th>Report generated</th><td>${today()}</td></tr><tr><th>Items in the record</th><td>${P.items.length}</td></tr>
+<tr><th>Final version</th><td>${P.releases.length ? esc(P.releases[P.releases.length - 1].version) + " (" + esc(P.releases[P.releases.length - 1].date) + ")" : "Not created yet"}</td></tr>
+</tbody></table>
+<h2>Deviations from the default rules</h2>
+${dev.length ? `<table><thead><tr><th>Stage</th><th>Status</th><th>Justification</th></tr></thead><tbody>${dev.map(x => `<tr><td>${x.s.n}. ${esc(x.s.title)}</td><td>${STATUS[x.st.status]}</td><td>${x.st.justification.trim() ? nl2br(x.st.justification) : "None recorded"}</td></tr>`).join("")}</tbody></table>` : `<p>No deviations were recorded.</p>`}
+<h2>Stages</h2>
+${STAGES.map(stageBlock).join("")}
+<h2>Item records</h2>
+<p class="muted">For each item: source → versions → evidence → decisions.</p>
+${P.items.length ? P.items.map(itemBlock).join("") : "<p>No items were recorded.</p>"}
+<h2>Decision log</h2>
+${P.decisions.length ? `<table><thead><tr><th>Date</th><th>Stage</th><th>Decision</th><th>Items</th><th>Reason</th></tr></thead><tbody>${P.decisions.map(d => `<tr><td>${esc(d.date)}</td><td>${d.stage}</td><td>${d.type === "return" ? "Return to stage " + d.returnTo : esc(DECISION_TYPES[d.type])}</td><td>${d.targets.map(t => esc(t.itemId) + " v" + t.version).join(", ") || "–"}</td><td>${esc(d.reason)}${d.weight ? " <em>Most weight:</em> " + esc(d.weight) : ""}</td></tr>`).join("")}</tbody></table>` : "<p>No decisions were recorded.</p>"}
+<p class="muted" style="margin-top:2.5rem;font-size:.85em">Generated with Q-TRACE. The accompanying data file contains the same record in machine-readable form.</p>
+</body></html>`;
+}
+
+function download(filename, text, type) {
+  const blob = new Blob([text], { type });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+/* ---------- dialogs ---------- */
+const dlg = () => $("#dlg");
+let dlgSubmit = null;
+function openDialog(html, onSubmit) {
+  const d = dlg();
+  d.innerHTML = `<form method="dialog" novalidate>${html}</form>`;
+  dlgSubmit = onSubmit;
+  if (d.open) d.close();
+  d.showModal();
+  const first = $("[autofocus]", d) || $("input:not([type=hidden]),select,textarea,button", d);
+  if (first) first.focus();
+}
+function closeDialog() { const d = dlg(); if (d.open) d.close(); d.innerHTML = ""; dlgSubmit = null; }
+function dlgError(msg) { const e = $("#dlg-err"); if (e) { e.textContent = msg; e.hidden = false; e.scrollIntoView({ block: "nearest" }); } }
+const dlgButtons = (ok = "Save", cls = "primary") => `<div class="note bad" id="dlg-err" role="alert" hidden></div><div class="dlg-actions"><button type="button" class="btn" data-act="closeDialog">Cancel</button><button type="submit" class="btn ${cls}">${ok}</button></div>`;
+
+function confirmDialog(title, text, okLabel, danger) {
+  return new Promise(resolve => {
+    openDialog(`<h2 id="dlg-title">${esc(title)}</h2><p>${esc(text)}</p>${dlgButtons(okLabel, danger ? "danger" : "primary")}`, () => { closeDialog(); resolve(true); return true; });
+    dlg().addEventListener("close", () => resolve(false), { once: true });
+  });
+}
+
+const stageSelect = (id, val, max = 8) => `<select id="${id}">${STAGES.filter(s => s.n <= max).map(s => `<option value="${s.n}" ${Number(val) === s.n ? "selected" : ""}>${s.n}. ${esc(s.title)}</option>`).join("")}</select>`;
+const facetSelect = (id, val) => `<select id="${id}"><option value="">No facet</option>${P.facets.map(f => `<option value="${f.id}" ${val === f.id ? "selected" : ""}>${esc(f.name || "(unnamed facet)")}</option>`).join("")}</select>`;
+function sourceFields(src) {
+  src = src || { type: "" };
+  return `<label for="src-type">Source</label>
+    <select id="src-type" data-dlg-change="source"><option value="">Choose…</option>${Object.entries(SOURCE_TYPES).map(([k, v]) => `<option value="${k}" ${src.type === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+    <div id="src-existing" ${src.type === "existing" ? "" : "hidden"}><label for="src-scale">Name of the existing scale</label><input type="text" id="src-scale" value="${esc(src.scale)}"></div>
+    <div id="src-llm" ${src.type === "llm" ? "" : "hidden"}><label for="src-model">Model</label><input type="text" id="src-model" value="${esc(src.model)}"><label for="src-prompt">Prompt</label><textarea id="src-prompt" style="min-height:3.6rem">${esc(src.prompt)}</textarea></div>
+    <div id="src-detail-wrap" ${src.type === "new" || src.type === "other" ? "" : "hidden"}><label for="src-detail">Details <span class="hint">(optional for New)</span></label><input type="text" id="src-detail" value="${esc(src.detail)}"></div>`;
+}
+function readSource() {
+  const type = $("#src-type").value;
+  if (!type) return { error: "Choose the source of the item." };
+  if (type === "existing") { const scale = $("#src-scale").value.trim(); if (!scale) return { error: "Give the name of the existing scale." }; return { type, scale }; }
+  if (type === "llm") { const model = $("#src-model").value.trim(), prompt = $("#src-prompt").value.trim(); if (!model || !prompt) return { error: "Give both the model and the prompt for an LLM-generated item." }; return { type, model, prompt }; }
+  const detail = $("#src-detail").value.trim();
+  if (type === "other" && !detail) return { error: "Describe the source." };
+  return { type, detail };
+}
+function suggestItemId() { let n = P.items.length + 1, id; do { id = "ITEM-" + String(n++).padStart(2, "0"); } while (getItem(id)); return id; }
+const currentDefVersion = () => (P.definitions.length ? P.definitions[P.definitions.length - 1].version : null);
+
+function dlgNewItem(stage) {
+  openDialog(`<h2 id="dlg-title">Add an item</h2>
+    <div class="grid2"><div><label for="it-id">Item ID</label><input type="text" id="it-id" value="${esc(suggestItemId())}" autocomplete="off"><div class="hint">Used in the ratings file; cannot be changed later.</div></div>
+    <div><label for="it-facet">Facet</label>${facetSelect("it-facet", "")}</div></div>
+    <label for="it-text">Item text</label><textarea id="it-text" autofocus></textarea>
+    ${sourceFields()}
+    <div class="grid2"><div><label for="it-stage">Stage in which the item was added</label>${stageSelect("it-stage", stage || 4)}</div>
+    <div><label for="it-date">Date</label><input type="date" id="it-date" value="${today()}"></div></div>
+    <label for="it-reason">Reason for adding <span class="hint">(optional; logs the decision “Added”)</span></label><input type="text" id="it-reason">
+    ${dlgButtons("Add item")}`, () => {
+    const id = $("#it-id").value.trim(), text = $("#it-text").value.trim();
+    if (!id) return dlgError("Give the item an ID.");
+    if (/[\s,;"]/.test(id)) return dlgError("Use an ID without spaces, commas, semicolons or quotes (e.g., ANX-01).");
+    if (P.items.some(i => i.id.toLowerCase() === id.toLowerCase())) return dlgError("This ID is already in use.");
+    if (!text) return dlgError("Enter the item text.");
+    const src = readSource(); if (src.error) return dlgError(src.error);
+    const date = $("#it-date").value || today();
+    P.items.push({ id, facetId: $("#it-facet").value, source: src, versions: [{ v: 1, text, date, defVersion: currentDefVersion() }] });
+    const reason = $("#it-reason").value.trim();
+    if (reason) P.decisions.push({ id: uid(), type: "added", stage: Number($("#it-stage").value), date, targets: [{ itemId: id, version: 1 }], reason, weight: "", evidenceIds: [] });
+    done("Item " + id + " added.");
+    return true;
+  });
+}
+
+function evidencePick(itemIds, checked) {
+  const list = P.evidence.filter(e => itemIds.includes(e.itemId));
+  if (!list.length) return `<p class="hint" style="margin:.2rem 0">No evidence recorded for the selected item(s).</p>`;
+  return `<div class="picklist">${list.map(e => `<label class="check" for="pe-${e.id}"><input type="checkbox" id="pe-${e.id}" name="pick-ev" value="${e.id}" ${checked && checked.includes(e.id) ? "checked" : ""}><span><span class="mono">${esc(e.itemId)}</span> v${e.version} · ${esc(EVIDENCE_TYPES[e.type] || e.type)}: ${esc(cut(e.summary, 90))}</span></label>`).join("")}</div>`;
+}
+
+function dlgEditItem(id) {
+  const it = getItem(id), cv = curVersion(it);
+  openDialog(`<h2 id="dlg-title">Edit wording of ${esc(it.id)}</h2>
+    <p class="hint">Saving creates version ${cv.v + 1}. Version ${cv.v} stays visible in the history of the item, and the change is logged as the decision “Revised”.</p>
+    <div class="note"><span class="hint">Version ${cv.v}</span><br>${esc(cv.text)}</div>
+    <label for="ed-text">New wording (version ${cv.v + 1})</label><textarea id="ed-text" autofocus>${esc(cv.text)}</textarea>
+    <label for="ed-reason">Reason for the revision</label><textarea id="ed-reason" style="min-height:3.6rem"></textarea>
+    <div class="grid2"><div><label for="ed-stage">Stage in which the decision was made</label>${stageSelect("ed-stage", lastStage())}</div>
+    <div><label for="ed-date">Date</label><input type="date" id="ed-date" value="${today()}"></div></div>
+    <div class="label" id="ed-ev-l">Evidence that prompted the revision</div><div role="group" aria-labelledby="ed-ev-l">${evidencePick([it.id])}</div>
+    <label for="ed-weight">Evidence given most weight <span class="hint">(optional)</span></label><input type="text" id="ed-weight">
+    ${dlgButtons("Save as version " + (cv.v + 1))}`, () => {
+    const text = $("#ed-text").value.trim(), reason = $("#ed-reason").value.trim();
+    if (!text) return dlgError("Enter the new wording.");
+    if (text === cv.text) return dlgError("The wording is unchanged. Change the text, or cancel.");
+    if (!reason) return dlgError("Give a short reason for the revision.");
+    const date = $("#ed-date").value || today();
+    it.versions.push({ v: cv.v + 1, text, date, defVersion: currentDefVersion() });
+    P.decisions.push({ id: uid(), type: "revised", stage: Number($("#ed-stage").value), date, targets: [{ itemId: it.id, version: cv.v }], reason, weight: $("#ed-weight").value.trim(),
+      evidenceIds: $$("[name=pick-ev]:checked", dlg()).map(x => x.value), resultVersion: cv.v + 1 });
+    done(it.id + " is now at version " + (cv.v + 1) + ".");
+    return true;
+  });
+}
+
+function dlgEditItemMeta(id) {
+  const it = getItem(id);
+  openDialog(`<h2 id="dlg-title">Facet and source of ${esc(it.id)}</h2>
+    <p class="hint">Changing the facet or correcting the source does not create a new version; only a change of wording does.</p>
+    <label for="it-facet">Facet</label>${facetSelect("it-facet", it.facetId)}
+    ${sourceFields(it.source)}
+    ${dlgButtons()}`, () => {
+    const src = readSource(); if (src.error) return dlgError(src.error);
+    it.facetId = $("#it-facet").value; it.source = src;
+    done("Saved.");
+    return true;
+  });
+}
+
+function lastStage() { return route.view === "stage" ? route.n : 8; }
+
+function dlgNewEvidence(itemId, type) {
+  if (!P.items.length) return toast("Add an item first.");
+  type = type || "interview";
+  const it0 = itemId ? getItem(itemId) : P.items[0];
+  const versionOpts = it => it.versions.map(v => `<option value="${v.v}" ${v.v === curVersion(it).v ? "selected" : ""}>Version ${v.v}: ${esc(cut(v.text, 60))}</option>`).join("");
+  openDialog(`<h2 id="dlg-title">Add evidence</h2>
+    <label for="ev-item">Item</label><select id="ev-item" data-dlg-change="evItem">${P.items.map(i => `<option value="${esc(i.id)}" ${i.id === it0.id ? "selected" : ""}>${esc(i.id)} — ${esc(cut(curVersion(i).text, 50))}</option>`).join("")}</select>
+    <label for="ev-version">Item version the evidence is about</label><select id="ev-version">${versionOpts(it0)}</select>
+    <div class="grid2"><div><label for="ev-type">Kind of evidence</label><select id="ev-type" data-dlg-change="evType">${Object.entries(EVIDENCE_TYPES).map(([k, v]) => `<option value="${k}" ${k === type ? "selected" : ""}>${v}</option>`).join("")}</select></div>
+    <div><label for="ev-stage">Stage</label>${stageSelect("ev-stage", EVIDENCE_STAGE[type])}</div></div>
+    <div id="ev-expected-wrap" ${type === "overlap" ? "" : "hidden"}><label for="ev-expected">Was the overlap expected?</label><select id="ev-expected"><option value="">Not recorded</option><option value="yes">Yes, expected</option><option value="no">No, not expected</option><option value="unclear">Unclear</option></select></div>
+    <label for="ev-summary">Summary</label><textarea id="ev-summary" autofocus placeholder="A coded summary, never a transcript."></textarea>
+    <p class="hint" id="ev-hint">${type === "expert" ? "For relevance ratings of a whole panel, use the CSV upload in Stage 6; it calculates the I-CVI and links it to the item version." : ""}</p>
+    <label for="ev-date">Date</label><input type="date" id="ev-date" value="${today()}">
+    ${dlgButtons("Add evidence")}`, () => {
+    const summary = $("#ev-summary").value.trim();
+    if (!summary) return dlgError("Enter a short summary of the evidence.");
+    const e = { id: uid(), itemId: $("#ev-item").value, version: Number($("#ev-version").value), type: $("#ev-type").value, stage: Number($("#ev-stage").value), date: $("#ev-date").value || today(), summary };
+    if (e.type === "overlap") e.expected = $("#ev-expected").value;
+    P.evidence.push(e);
+    done("Evidence linked to " + e.itemId + " version " + e.version + ".");
+    return true;
+  });
+}
+
+function dlgNewDecision(opts) {
+  opts = opts || {};
+  const isReturn = opts.type === "return";
+  if (!P.items.length && !isReturn) return toast("Add an item first.");
+  const stage = opts.stage || lastStage();
+  const pre = opts.itemId ? [opts.itemId] : [];
+  const groups = P.facets.map(f => ({ name: f.name || "(unnamed facet)", items: P.items.filter(i => i.facetId === f.id) })).concat([{ name: "No facet", items: P.items.filter(i => !P.facets.some(f => f.id === i.facetId)) }]).filter(g => g.items.length);
+  openDialog(`<h2 id="dlg-title">${isReturn ? "Record a return to an earlier stage" : "Record a decision"}</h2>
+    <div class="grid2"><div><label for="dc-type">Decision</label><select id="dc-type" data-dlg-change="decType">${Object.entries(DECISION_TYPES).map(([k, v]) => `<option value="${k}" ${k === (opts.type || "retained") ? "selected" : ""}>${v}</option>`).join("")}</select></div>
+    <div><label for="dc-stage">Stage in which the decision was made</label>${stageSelect("dc-stage", stage)}</div></div>
+    <div id="dc-return-wrap" ${isReturn ? "" : "hidden"}><label for="dc-return">Return to stage</label>${stageSelect("dc-return", Math.max(1, stage - 1), 7)}</div>
+    <fieldset style="margin-top:.8rem"><legend>Items the decision applies to <span class="hint" id="dc-items-hint">${isReturn ? "(optional for a return)" : "(one or more)"}</span></legend>
+      <div class="picklist" id="dc-items">${groups.map((g, gi) => `<div style="margin:.3rem 0"><strong style="font-size:.85rem">${esc(g.name)}</strong> <button type="button" class="btn link" data-act="pickGroup" data-g="${gi}" style="font-size:.82rem">select all</button>
+        ${g.items.map(i => `<label class="check" for="pi-${esc(i.id)}"><input type="checkbox" id="pi-${esc(i.id)}" name="pick-item" data-g="${gi}" value="${esc(i.id)}" ${pre.includes(i.id) ? "checked" : ""} data-dlg-change="decItems"><span><span class="mono">${esc(i.id)}</span> v${curVersion(i).v} · ${esc(cut(curVersion(i).text, 70))}</span></label>`).join("")}</div>`).join("") || `<p class="hint">No items yet.</p>`}</div>
+    </fieldset>
+    <div id="dc-merge-wrap" hidden><label for="dc-merge">Merged into</label><select id="dc-merge"><option value="">Choose the item that remains…</option>${P.items.map(i => `<option value="${esc(i.id)}">${esc(i.id)} — ${esc(cut(curVersion(i).text, 50))}</option>`).join("")}</select></div>
+    <label for="dc-reason">Reason</label><textarea id="dc-reason" style="min-height:3.6rem" ${pre.length || isReturn ? "autofocus" : ""}></textarea>
+    <div class="label" id="dc-ev-l">Evidence the decision is based on</div><div role="group" aria-labelledby="dc-ev-l" id="dc-ev">${evidencePick(pre)}</div>
+    <label for="dc-weight">Evidence given most weight, and why <span class="hint">(optional)</span></label><input type="text" id="dc-weight">
+    <label for="dc-date">Date</label><input type="date" id="dc-date" value="${today()}">
+    <p class="hint">A decision applies to the current version of each selected item. To change the wording of an item, use “Edit wording” on the item page: that creates a new version and logs the revision.</p>
+    ${dlgButtons("Record decision")}`, () => {
+    const type = $("#dc-type").value, st = Number($("#dc-stage").value), reason = $("#dc-reason").value.trim();
+    const ids = $$("[name=pick-item]:checked", dlg()).map(x => x.value);
+    if (type !== "return" && !ids.length) return dlgError("Select at least one item.");
+    if (!reason) return dlgError("Give a short reason for the decision.");
+    const d = { id: uid(), type, stage: st, date: $("#dc-date").value || today(), targets: ids.map(i => ({ itemId: i, version: curVersion(getItem(i)).v })), reason, weight: $("#dc-weight").value.trim(),
+      evidenceIds: $$("[name=pick-ev]:checked", dlg()).map(x => x.value) };
+    if (type === "return") { d.returnTo = Number($("#dc-return").value); if (d.returnTo >= st) return dlgError("Choose an earlier stage to return to than the stage in which the decision was made."); }
+    if (type === "merged") { const mi = $("#dc-merge").value; if (!mi) return dlgError("Choose the item that the selected item(s) are merged into."); if (ids.includes(mi)) return dlgError("The item that remains cannot be one of the merged items."); d.mergedInto = mi; }
+    P.decisions.push(d);
+    done(type === "return" ? "Return to stage " + d.returnTo + " recorded." : "Decision recorded for " + ids.length + " item" + (ids.length === 1 ? "" : "s") + ".");
+    return true;
+  });
+}
+
+function dlgSaveDefinition() {
+  const last = P.definitions[P.definitions.length - 1];
+  const v = last ? last.version + 1 : 1;
+  openDialog(`<h2 id="dlg-title">Save construct definition as version ${v}</h2>
+    <p class="hint">${last ? "Version " + last.version + " stays in the record. Items written from now on are linked to version " + v + "." : "This is the reference point for later decisions."}</p>
+    <label for="df-reason">${last ? "Reason for the change" : "Note"} ${last ? "" : `<span class="hint">(optional)</span>`}</label><textarea id="df-reason" autofocus style="min-height:3.6rem"></textarea>
+    <label for="df-date">Date</label><input type="date" id="df-date" value="${today()}">
+    ${dlgButtons("Save version " + v)}`, () => {
+    const reason = $("#df-reason").value.trim();
+    if (last && !reason) return dlgError("Give a short reason for the change.");
+    const d = P.definitionDraft;
+    P.definitions.push({ version: v, date: $("#df-date").value || today(), reason, definition: d.definition.trim(), excludes: d.excludes.trim(), relations: d.relations.trim(), timeframe: d.timeframe.trim(), facets: P.facets.map(f => f.name).filter(Boolean) });
+    done("Construct definition saved as version " + v + ".");
+    return true;
+  });
+}
+
+function dlgCreateRelease() {
+  const noDecision = P.items.filter(i => !itemStatus(i.id));
+  const noReason = P.items.filter(i => { const d = itemStatus(i.id); return d && !d.reason.trim(); });
+  const unjust = STAGES.filter(s => { const st = P.stages[s.n]; return (st.status === "deviation" || st.status === "na") && !st.justification.trim(); });
+  const included = P.items.filter(i => { const d = itemStatus(i.id); return !d || (d.type !== "removed" && d.type !== "merged"); });
+  const version = (P.releases.length + 1) + ".0";
+  const warn = [];
+  if (noDecision.length) warn.push(`${noDecision.length} item${noDecision.length === 1 ? " has" : "s have"} no final status: ${noDecision.map(i => i.id).join(", ")}.`);
+  if (noReason.length) warn.push(`${noReason.length} decision${noReason.length === 1 ? " has" : "s have"} no reason.`);
+  if (unjust.length) warn.push(`Stage ${unjust.map(s => s.n).join(", ")}: deviation or not applicable without a justification.`);
+  if (!P.items.length) return toast("There are no items yet.");
+  openDialog(`<h2 id="dlg-title">Create final version ${version}</h2>
+    <p>${included.length} of ${P.items.length} items are included (items that are removed or merged are left out).</p>
+    ${warn.length ? `<div class="note warn"><strong>Before release.</strong> A version is normally released only when every item has a final status with a justification and every deviation is justified.<ul>${warn.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : `<div class="note ok">Every item has a final status with a reason, and every deviation is justified.</div>`}
+    <label for="rl-version">Version number</label><input type="text" id="rl-version" value="${version}">
+    <label for="rl-note">Note <span class="hint">(optional)</span></label><input type="text" id="rl-note" placeholder="E.g., ready for pilot testing">
+    <label for="rl-date">Date</label><input type="date" id="rl-date" value="${today()}">
+    ${dlgButtons(warn.length ? "Create anyway" : "Create final version")}`, () => {
+    const ver = $("#rl-version").value.trim();
+    if (!ver) return dlgError("Give the version a number.");
+    if (P.releases.some(r => r.version === ver)) return dlgError("This version number already exists.");
+    P.releases.push({ version: ver, date: $("#rl-date").value || today(), note: $("#rl-note").value.trim(),
+      items: included.map(i => ({ itemId: i.id, v: curVersion(i).v, text: curVersion(i).text, facet: facetName(i.facetId) })) });
+    done("Final version " + ver + " created. Export the report and the data file to share it with its development record.");
+    return true;
+  });
+}
+
+function done(msg) { saveNow(); closeDialog(); render(); toast(msg); }
+
+/* ---------- toast ---------- */
+let toastTimer = null;
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 4500);
+}
+
+/* ---------- actions ---------- */
+async function replaceProject(next, hash, msg) {
+  if (P) {
+    const ok = await confirmDialog("Replace the current project?", `“${P.meta.name || "Untitled project"}” is stored in this browser. It will be replaced. Export the data file first if you want to keep it.`, "Replace", true);
+    if (!ok) return;
+  }
+  P = next; saveNow(); go(hash); if (msg) toast(msg);
+}
+
+const actions = {
+  newProject: () => replaceProject(newProject(), "#/project", "New project created."),
+  loadExample: () => replaceProject(exampleProject(), "#/project", "Example project loaded."),
+  openFile: () => { const f = $("#import-file"); if (f) { f.value = ""; f.click(); } },
+  closeDialog: () => closeDialog(),
+  addMeasure: () => { P.similarMeasures.push({ id: uid(), name: "", limitation: "" }); saveNow(); render(); const l = P.similarMeasures[P.similarMeasures.length - 1]; const el = $("#sm-n-" + l.id); if (el) el.focus(); },
+  delMeasure: el => { P.similarMeasures.splice(Number(el.dataset.i), 1); saveNow(); render(); },
+  addFacet: () => { P.facets.push({ id: uid(), name: "", intended: "" }); saveNow(); render(); const l = P.facets[P.facets.length - 1]; const el = $("#fc-n-" + l.id); if (el) el.focus(); },
+  delFacet: el => {
+    const f = P.facets[Number(el.dataset.i)];
+    if (P.items.some(i => i.facetId === f.id)) return toast("This facet still has items. Move them to another facet first.");
+    P.facets.splice(Number(el.dataset.i), 1);
+    P.population.themes.forEach(t => { if (t.facetId === f.id) t.facetId = ""; });
+    saveNow(); render();
+  },
+  addTheme: () => { P.population.themes.push({ id: uid(), theme: "", facetId: "", reason: "" }); saveNow(); render(); const l = P.population.themes[P.population.themes.length - 1]; const el = $("#th-t-" + l.id); if (el) el.focus(); },
+  delTheme: el => { P.population.themes.splice(Number(el.dataset.i), 1); saveNow(); render(); },
+  saveDefinition: () => dlgSaveDefinition(),
+  newItem: el => dlgNewItem(el.dataset.stage ? Number(el.dataset.stage) : null),
+  editItem: el => dlgEditItem(el.dataset.id),
+  editItemMeta: el => dlgEditItemMeta(el.dataset.id),
+  delItem: async el => {
+    const id = el.dataset.id;
+    if (!(await confirmDialog("Delete " + id + " from the record?", "The item, its versions, and its evidence are deleted, and it is taken out of all decisions. This cannot be undone. To drop an item from the questionnaire, record the decision “Removed” instead.", "Delete", true))) return;
+    const evIds = P.evidence.filter(e => e.itemId === id).map(e => e.id);
+    P.items = P.items.filter(i => i.id !== id);
+    P.evidence = P.evidence.filter(e => e.itemId !== id);
+    P.decisions.forEach(d => { d.targets = d.targets.filter(t => t.itemId !== id); d.evidenceIds = (d.evidenceIds || []).filter(x => !evIds.includes(x)); });
+    P.decisions = P.decisions.filter(d => d.targets.length || d.type === "return");
+    saveNow(); go("#/items"); toast("Item " + id + " deleted.");
+  },
+  newEvidence: el => dlgNewEvidence(el.dataset.id, el.dataset.type),
+  delEvidence: async el => {
+    if (!(await confirmDialog("Remove this evidence?", "The entry is removed from the record. This cannot be undone.", "Remove", true))) return;
+    const id = el.dataset.id;
+    P.evidence = P.evidence.filter(e => e.id !== id);
+    P.decisions.forEach(d => { d.evidenceIds = (d.evidenceIds || []).filter(x => x !== id); });
+    saveNow(); render(); toast("Evidence removed.");
+  },
+  newDecision: el => dlgNewDecision({ itemId: el.dataset.id, stage: el.dataset.stage ? Number(el.dataset.stage) : null }),
+  returnFrom: el => dlgNewDecision({ type: "return", stage: Number(el.dataset.stage) }),
+  delDecision: async el => {
+    if (!(await confirmDialog("Remove this decision?", "The decision is removed from the record. Item versions stay as they are. This cannot be undone.", "Remove", true))) return;
+    P.decisions = P.decisions.filter(d => d.id !== el.dataset.id); saveNow(); render(); toast("Decision removed.");
+  },
+  pickGroup: el => { $$(`[name=pick-item][data-g="${el.dataset.g}"]`, dlg()).forEach(c => { c.checked = true; }); dlgChange.decItems(); },
+  pickCsv: () => { const f = $("#csv-file"); if (f) { f.value = ""; f.click(); } },
+  downloadExampleCsv: () => download("example-expert-ratings.csv", EXAMPLE_CSV, "text/csv;charset=utf-8"),
+  delUpload: async el => {
+    if (!(await confirmDialog("Remove this upload?", "The ratings and the I-CVI evidence that was linked to the item versions are removed.", "Remove", true))) return;
+    removeCviUpload(el.dataset.id); saveNow(); render(); toast("Upload removed.");
+  },
+  createRelease: () => dlgCreateRelease(),
+  exportReport: () => { download("q-trace-report-" + slug(P.meta.name) + ".html", buildReport(), "text/html;charset=utf-8"); toast("Report exported."); },
+  printReport: () => {
+    const url = URL.createObjectURL(new Blob([buildReport()], { type: "text/html;charset=utf-8" }));
+    const w = window.open(url, "_blank");
+    if (!w) toast("The browser blocked the new tab. Use “Export report” and open the file instead.");
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  },
+  exportData: () => {
+    saveNow();
+    download("q-trace-" + slug(P.meta.name) + "-" + today() + ".json", JSON.stringify({ format: FORMAT, version: FORMAT_VERSION, exportedAt: new Date().toISOString(), project: P }, null, 2), "application/json");
+    toast("Data file exported. Archive it in an open repository.");
+  },
+  clearProject: async () => {
+    if (!(await confirmDialog("Remove the project from this browser?", "The project is deleted from this browser. Without an exported data file it cannot be recovered.", "Remove", true))) return;
+    P = null; try { localStorage.removeItem(STORE_KEY); } catch (e) {} go("#/"); toast("Project removed from this browser.");
+  }
+};
+
+/* changes inside dialogs that show or hide fields */
+const dlgChange = {
+  source: () => { const t = $("#src-type").value; $("#src-existing").hidden = t !== "existing"; $("#src-llm").hidden = t !== "llm"; $("#src-detail-wrap").hidden = !(t === "new" || t === "other"); },
+  evItem: () => { const it = getItem($("#ev-item").value); $("#ev-version").innerHTML = it.versions.map(v => `<option value="${v.v}" ${v.v === curVersion(it).v ? "selected" : ""}>Version ${v.v}: ${esc(cut(v.text, 60))}</option>`).join(""); },
+  evType: () => { const t = $("#ev-type").value; $("#ev-expected-wrap").hidden = t !== "overlap"; $("#ev-stage").value = EVIDENCE_STAGE[t]; $("#ev-hint").textContent = t === "expert" ? "For relevance ratings of a whole panel, use the CSV upload in Stage 6; it calculates the I-CVI and links it to the item version." : ""; },
+  decType: () => { const t = $("#dc-type").value; $("#dc-return-wrap").hidden = t !== "return"; $("#dc-merge-wrap").hidden = t !== "merged"; $("#dc-items-hint").textContent = t === "return" ? "(optional for a return)" : "(one or more)"; },
+  decItems: () => { const keep = $$("[name=pick-ev]:checked", dlg()).map(x => x.value); $("#dc-ev").innerHTML = evidencePick($$("[name=pick-item]:checked", dlg()).map(x => x.value), keep); }
+};
+
+/* ---------- events ---------- */
+document.addEventListener("click", ev => {
+  const el = ev.target.closest("[data-act]");
+  if (!el || el.disabled) return;
+  const fn = actions[el.dataset.act];
+  if (fn) { ev.preventDefault(); fn(el); }
+});
+
+document.addEventListener("input", ev => {
+  const el = ev.target;
+  if (!P || !el.dataset || !el.dataset.bind || el.type === "checkbox" || el.type === "radio" || el.tagName === "SELECT") return;
+  setPath(P, el.dataset.bind, el.dataset.num !== undefined ? (el.value === "" ? "" : Math.max(0, Math.round(Number(el.value) || 0))) : el.value);
+  const s = $("#saved"); if (s) s.textContent = "Saving…";
+  save();
+});
+
+document.addEventListener("change", ev => {
+  const el = ev.target;
+  if (el.dataset && el.dataset.dlgChange) { dlgChange[el.dataset.dlgChange](); return; }
+  if (el.id === "import-file") return importFile(el.files[0]);
+  if (el.id === "csv-file") return uploadCsv(el.files[0]);
+  if (!P || !el.dataset || !el.dataset.bind) return;
+  if (el.type === "checkbox") setPath(P, el.dataset.bind, el.checked);
+  else if (el.type === "radio") { if (el.checked) setPath(P, el.dataset.bind, el.value); }
+  else if (el.tagName === "SELECT") setPath(P, el.dataset.bind, el.value);
+  saveNow();
+  if (el.dataset.rr !== undefined || el.dataset.rrBlur !== undefined) render();
+});
+
+$("#dlg").addEventListener("submit", ev => {
+  ev.preventDefault();
+  if (dlgSubmit) dlgSubmit();
+});
+$("#dlg").addEventListener("click", ev => { if (ev.target === dlg()) closeDialog(); });
+$("#dlg").addEventListener("close", () => { dlg().innerHTML = ""; dlgSubmit = null; });
+
+window.addEventListener("hashchange", () => { if (dlg().open) closeDialog(); route = parseHash(); render(true); });
+window.addEventListener("beforeunload", () => { clearTimeout(saveTimer); saveNow(); });
+
+function importFile(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    let obj;
+    try { obj = JSON.parse(String(r.result)); } catch (e) { return toast("This file could not be read: it is not valid JSON."); }
+    if (!obj || obj.format !== FORMAT || !obj.project || typeof obj.project !== "object") return toast("This is not a Q-TRACE data file.");
+    if (Number(obj.version) > FORMAT_VERSION) return toast("This file was made with a newer version of Q-TRACE and cannot be opened here.");
+    replaceProject(normalize(obj.project), "#/project", "Project imported from " + file.name + ".");
+  };
+  r.onerror = () => toast("The file could not be read.");
+  r.readAsText(file);
+}
+
+function uploadCsv(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    const res = addCviUpload(file.name, String(r.result));
+    if (res.error) return toast(res.error);
+    saveNow(); render();
+    const linked = res.upload.results.filter(x => x.linked).length;
+    toast(`${res.replaced ? "Same file uploaded again: the earlier upload was replaced. " : ""}I-CVI calculated for ${res.upload.results.length} item version${res.upload.results.length === 1 ? "" : "s"}; ${linked} linked to the item table.`);
+  };
+  r.onerror = () => toast("The file could not be read.");
+  r.readAsText(file);
+}
+
+/* ---------- start ---------- */
+load();
+route = parseHash();
+render();
+</script>
+</body>
+</html>
